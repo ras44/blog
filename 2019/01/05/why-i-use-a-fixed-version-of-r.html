@@ -83,9 +83,9 @@
 <ul>
 <li><a href="https://github.com/ras44/rstudio-instance">rstudio-instance</a> contains branches with scripts to set up a linux instance with fixed R and RStudio versions. I <code>git clone</code> the repo and <code>git checkout</code> the branch suitable for the linux flavor, R-version, and RStudio version I want. The scripts also ensure R is not auto-updated in the future.</li>
 <li>Once my fixed-R instance is set up, <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> contains an R-version specific base project with pre-built, Packrat-managed, fixed-versions of many popular data-science packages<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>.</li>
-<li>I <code>git clone</code> <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> to a new project directory locally and remove the existing <code>.git</code> directory so that I can turn it into a new .git repo with <code>git init</code>.</li>
-<li>I open the project in RStudio and begin work. All packages are pre-built, so I don’t have to go through lengthy installs. I can upgrade packages in the <code>Packrat Library</code> of the “Packages” tab, and then run <code>packrat::snapshot()</code> to save the new libraries into my project’s <code>packrat/</code> directory.</li>
-<li>If I ever need to duplicate results, I can always build the same fixed-R instance, clone the project I created, and know that it will work exactly the same as when I previously worked on it… sometimes years earlier.</li>
+<li>I <code>git clone</code> <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> to a new project directory locally and remove the existing <code>.git</code> directory so that I can turn it into a new git repo with <code>git init</code>.</li>
+<li>I open the project in RStudio and begin work. All packages are pre-built, so I don’t have to go through lengthy installs. I can upgrade packages in the <code>Packrat Library</code> of the “Packages” tab, and then run <code>packrat::snapshot()</code> to save the any libraries and ugrades into my project’s <code>packrat/</code> directory.</li>
+<li>If I ever need to duplicate results, I know can always build the same fixed-R instance, clone the project I created, and know that it will work exactly the same as when I previously worked on it… sometimes years earlier.</li>
 </ul>
 </div>
 <div id="why-i-use-a-fixed-version-of-r" class="section level2">
