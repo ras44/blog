@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.54.0" />
+
+
+<title>Cost Effective Partitioning in BigQuery with R - Roland&#39;s Blog</title>
+<meta property="og:title" content="Cost Effective Partitioning in BigQuery with R - Roland&#39;s Blog">
+
+
+  <link href='../../../favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../" class="nav-logo">
+    <img src="../../../images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="https://github.com/ras44">GitHub</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">3 min read</span>
+    
+
+    <h1 class="article-title">Cost Effective Partitioning in BigQuery with R</h1>
+
+    
+    <span class="article-date">2018-05-02</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p><a href="https://github.com/ras44/blog/edit/master/content/post/2018-05-02-cost-effective-partitioning-in-bigquery-with-r.Rmd">edit</a></p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Companies using Google BigQuery for production analytics often run into the following problem: the company has a large user hit table that spans many years. Since queries are billed based on the fields accessed, and not on the date-ranges queried, queries on the table are billed for all available days and are increasingly wasteful.</p>
+<div class="figure">
+<img src="../../../post/2018-05-02-cost-effective-partitioning-in-bigquery-with-r_files/180502_partition.png" alt="Partitioning Tables" />
+<p class="caption">Partitioning Tables</p>
+</div>
+<p>A solution is to partition the table by date, so that users can query a particular range of dates; saving costs and decreasing query duration. Partitioning an un-partitioned table can be expensive if done the brute-force way. This article explores one cost-effective partitioning method, and uses the <a href="https://github.com/ras44/condusco">condusco</a> R Package to automate the query generation and partitioning steps.</p>
+</div>
+<div id="migrating-non-partitioned-tables-to-partitioned-tables-in-google-bigquery" class="section level2">
+<h2>Migrating non-partitioned tables to partitioned tables in Google BigQuery</h2>
+<p>Let’s implement the accepted solution on StackOverflow for <a href="https://stackoverflow.com/questions/38993877/migrating-from-non-partitioned-to-partitioned-tables">migrating from non-partitioned to partitioned tables in Google BigQuery</a>.</p>
+<p>The brute-force way to partition a non-partitioned table is to repeatedly query the table for anything matching a particular day and then save that data to a new table with the date suffix, ie. _20171201.</p>
+<p>The problem is the cost for this method is the cost of querying the full table’s worth of data, multiplied by the number of days it needs to be partitioned into. For a 10 Terabyte table spanning three years, one SELECT * might cost $50 (BigQuery charges $5 per TB accessed). Hence, splitting the table into three years of daily partitions will cost $50*365*3 = <strong>$54,750</strong>!</p>
+<p>The more cost-effective <a href="https://stackoverflow.com/questions/38993877/migrating-from-non-partitioned-to-partitioned-tables">solution</a> described on StackOverflow is to ARRAY_AGG the entire table into one record for each day. This requires one query over the table’s data to ARRAY_AGG each day you are interested in, and then multiple UNNEST queries using a single query on a single column.</p>
+<p>This solution queries the full table’s worth of data twice, instead of the number of days. That’s a cost of $100, saving <strong>$54,650</strong>.</p>
+<p>Here is an implementation of the solution using <a href="https://github.com/ras44/condusco">condusco</a> to automate both the query generation and the partitioning:</p>
+<pre class="r"><code>library(whisker)
+library(bigrquery)
+library(condusco)
+
+# Set GBQ project
+project &lt;- &#39;&lt;YOUR_GBQ_PROJECT_ID_HERE&gt;&#39;
+
+# Configuration
+config &lt;- data.frame(
+  dataset_id = &#39;&lt;YOUR_GBQ_DATASET_ID_HERE&gt;&#39;,
+  table_prefix = &#39;tmp_test_partition&#39;
+)
+
+# Set the following options for GBQ authentication on a cloud instance
+options(&quot;httr_oauth_cache&quot; = &quot;~/.httr-oauth&quot;)
+options(httr_oob_default=TRUE)
+
+# Run the below query to authenticate and write credentials to .httr-oauth file
+query_exec(&quot;SELECT &#39;foo&#39; as bar&quot;,project=project);
+
+
+
+
+# The pipeline that creates the pivot table
+migrating_to_partitioned_step_001_create_pivot &lt;- function(params){
+  
+  destination_table &lt;- &quot;{{{dataset_id}}}.{{{table_prefix}}}_partitions&quot;
+  
+  query &lt;- &quot;
+  SELECT
+    {{#date_list}}
+    ARRAY_CONCAT_AGG(CASE WHEN d = &#39;day{{{yyyymmdd}}}&#39; THEN r END) AS day_{{{yyyymmdd}}},
+    {{/date_list}}
+    line
+  FROM (
+    SELECT d, r, ROW_NUMBER() OVER(PARTITION BY d) AS line
+    FROM (
+      SELECT 
+        stn, CONCAT(&#39;day&#39;, year, mo, da) AS d, ARRAY_AGG(t) AS r
+      FROM `bigquery-public-data.noaa_gsod.gsod2017` AS t 
+      GROUP BY stn, d
+    ) 
+  )
+  GROUP BY line
+  &quot;
+  
+  query_exec(whisker.render(query,params),
+             project=project,
+             destination_table=whisker.render(destination_table, params),
+             write_disposition=&#39;WRITE_TRUNCATE&#39;,
+             use_legacy_sql = FALSE
+  );
+  
+}
+
+
+
+# Run the pipeline that creates the pivot table
+
+# Create a JSON string in the invocation query that looks like [{&quot;yyyymmdd&quot;:&quot;20171206&quot;},{&quot;yyyymmdd&quot;:&quot;20171205&quot;},...]
+invocation_query &lt;- &quot;
+  SELECT
+    &#39;{{{dataset_id}}}&#39; as dataset_id,
+    &#39;{{{table_prefix}}}&#39; as table_prefix,
+    CONCAT(
+      &#39;[&#39;,
+      STRING_AGG(
+        CONCAT(&#39;{\&quot;yyyymmdd\&quot;:\&quot;&#39;,FORMAT_DATE(&#39;%Y%m%d&#39;,partition_date),&#39;\&quot;}&#39;)
+      ),
+      &#39;]&#39;
+    ) as date_list
+  FROM (
+    SELECT
+    DATE_ADD(DATE(CURRENT_DATETIME()), INTERVAL -n DAY) as partition_date
+    FROM (
+      SELECT [1,2,3] as n
+    ),
+    UNNEST(n) AS n
+  )
+&quot;
+
+run_pipeline_gbq(
+  migrating_to_partitioned_step_001_create_pivot,
+  whisker.render(invocation_query,config),
+  project,
+  use_legacy_sql = FALSE
+)
+
+
+
+
+
+
+# The pipeline that creates the individual partitions 
+migrating_to_partitioned_step_002_unnest &lt;- function(params){
+  
+  destination_table &lt;- &quot;{{{dataset_id}}}.{{{table_prefix}}}_{{{day_partition_date}}}&quot;
+  
+  query &lt;- &quot;
+    SELECT r.*
+    FROM {{{dataset_id}}}.{{{table_prefix}}}_partitions, UNNEST({{{day_partition_date}}}) as r
+  &quot;
+  
+  query_exec(whisker.render(query,params),
+             project=project,
+             destination_table=whisker.render(destination_table, params),
+             write_disposition=&#39;WRITE_TRUNCATE&#39;,
+             use_legacy_sql = FALSE
+  );
+  
+}
+
+
+invocation_query &lt;- &quot;
+  SELECT
+    &#39;{{{dataset_id}}}&#39; as dataset_id,
+    &#39;{{{table_prefix}}}&#39; as table_prefix,
+    CONCAT(&#39;day_&#39;,FORMAT_DATE(&#39;%Y%m%d&#39;,partition_date)) as day_partition_date
+  FROM (
+    SELECT
+      DATE_ADD(DATE(CURRENT_DATETIME()), INTERVAL -n DAY) as partition_date
+    FROM (
+      SELECT [1,2,3] as n
+    ),
+    UNNEST(n) AS n
+  )
+&quot;
+
+run_pipeline_gbq(
+  migrating_to_partitioned_step_002_unnest,
+  whisker.render(invocation_query,config),
+  project,
+  use_legacy_sql = FALSE
+)</code></pre>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="../../../js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
