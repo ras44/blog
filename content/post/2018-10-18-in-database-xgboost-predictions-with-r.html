@@ -1,0 +1,108 @@
+---
+title: In-database xgboost Predictions with R
+author: Roland Stevenson
+date: '2018-10-18'
+slug: in-database-xgboost-predictions-with-r
+categories: []
+tags: []
+---
+
+
+
+<p><a href="https://github.com/ras44/blog/edit/master/content/post/2018-10-18-in-database-xgboost-predictions-with-r.Rmd">edit</a></p>
+<p><a href="https://cran.r-project.org/web/packages/xgboost/">xgboost</a>(<a href="https://xgboost.readthedocs.io/en/latest/index.html">docs</a>) is a popular R package for classification and regression, and the model of choice in many winning <a href="https://www.kaggle.com/">Kaggle</a> competitions. Moving xgboost into a large-scale production environment, however, can lead to challenges when attempting to calculate predictions (“scores”) for large datasets. We present a novel solution for calculating batch predictions without having to transfer features stored in a database to the machine where the model is located; instead we convert the model predictions into SQL commands and thereby transfer the scoring process to the database.</p>
+<p>The enterprise problem arises when attempting to calculate probabilities for many thousands of subjects using many thousands of features located on a remote database. To run xgboost, the subject-features matrix <a href="https://xgboost.readthedocs.io/en/latest/faq.html#i-have-a-big-dataset">must be loaded into memory</a>, a <strong>cumbersome and expensive</strong> process.</p>
+<p>Available solutions require using expensive high-memory machines or implementing external memory across distributed machines (expensive and in <a href="https://xgboost.readthedocs.io/en/latest/tutorials/external_memory.html">beta</a>). Both solutions still require transferring all feature data from the database to the local machine(s), loading it into memory, calculating the probabilities for the subjects, and then transfering the probabilities back to the database for storage. In some of the author’s observed cases, <strong>20-50 minutes for ~1MM subjects</strong>.</p>
+<div class="figure">
+<img src="/post/2018-10-18-in-database-xgboost-predictions-with-r_files/181018_xgboost_workflows.png" alt="Local scoring vs. in-database scoring" width="700" />
+<p class="caption">Local scoring vs. in-database scoring</p>
+</div>
+<p>A simple alternative is <strong>in-database scoring</strong>: we convert the xgboost model prediction process into a SQL query, and thereby accomplish the same task while leveraging a cloud database’s scalability to efficiently calculate the predictions.</p>
+<p>To accomplish this, we’ll need to work through a few steps. First we’ll import the model as a list of nested tree structures that we can iterate through recursively. Then we’ll create a function that will recursively descend through a tree and translate it into a SQL CASE statement. We’ll then create a query that sums the CASE statements for all trees before logit-transforming it to calculate a probability.</p>
+<p>First, let’s review how to convert the model object to a list of trees that we can work with:</p>
+<pre class="r"><code>library(xgboost)
+library(jsonlite) 
+library(whisker)
+# our model exists in the variable `xgb_model`:
+# dump the list of trees as JSON and import it as `model_trees` using jsonlite
+model_trees &lt;- jsonlite::fromJSON(
+  xgb.dump(xgb_model, with_stats = FALSE, dump_format=&#39;json&#39;), 
+  simplifyDataFrame = FALSE)</code></pre>
+<p>Now we need to translate each tree into a SQL CASE statement. Each tree represents a set of decisions based on a whether a variable (the ‘split’) is less than a threshold value (the ‘split_condition’). The result of the decision could be ‘yes’, ‘no’, or ‘missing’. In each case, the tree provides the ‘node_id’ of the next decision to evaluate. When we reach a leaf, no decision needs to be made and instead a value is returned. An example tree is shown below:</p>
+<div class="figure">
+<img src="/post/2018-10-18-in-database-xgboost-predictions-with-r_files/181018_xgboost_tree_structure.png" alt="The structure of an xgboost tree" width="700" />
+<p class="caption">The structure of an xgboost tree</p>
+</div>
+<p>We’ll also need a dictionary that maps an integer to its associated feature name, since the trees themselves refer to 0-indexed integers instead of the feature names. We can accomplish that by creating the following list:</p>
+<pre class="r"><code>feature_dict &lt;- as.list(xgb_model$feature_names)</code></pre>
+<p>Using our <code>feature_dict</code>, we can recursively descend through the tree and translate each node into a CASE statement, producing a sequence of nested CASE statements. The following function does just that:</p>
+<pre class="r"><code>xgb_tree_sql &lt;- function(tree, feature_dict, sig=5){
+  # split variables must exist to generate subquery for tree children
+  sv &lt;- c(&quot;split&quot;, &quot;split_condition&quot;, &quot;yes&quot;, &quot;no&quot;, &quot;missing&quot;, &quot;children&quot;)
+  # we have a leaf, just return the leaf value  
+  if(&quot;leaf&quot; %in% names(tree)){
+    return(round(tree[[&#39;leaf&#39;]],sig))
+  }
+  else if(all(sv %in% names(tree))){
+    tree$split_long &lt;- feature_dict[[tree$split+1]] # +1 because xgboost is 0-indexed
+    
+    cs &lt;- c(tree$yes, tree$no, tree$missing)
+    cd &lt;- data.frame(
+      k = c(min(cs), max(cs)),
+      v = c(1,2)
+    )
+    tree$missing_sql &lt;- xgb_tree_sql(tree$children[[cd$v[cd$k==tree$missing]]], feature_dict)
+    tree$yes_sql &lt;- xgb_tree_sql(tree$children[[cd$v[cd$k==tree$yes]]], feature_dict)
+    tree$no_sql &lt;- xgb_tree_sql(tree$children[[cd$v[cd$k==tree$no]]], feature_dict)
+    
+    q &lt;- &quot;
+      CASE 
+        WHEN {{{split_long}}} IS NULL THEN {{{missing_sql}}}
+        WHEN {{{split_long}}} &lt; {{{split_condition}}} THEN {{{yes_sql}}}
+        ELSE {{{no_sql}}}
+      END
+    &quot;
+    return(whisker.render(q,tree))    
+    
+  }
+  
+}</code></pre>
+<p>When we transform one tree into a sequence of nested case statements, we are producing a statement that yields that tree’s contribution to the total score. We now need to sum the output of each tree and then calculate the total probability prediction. In other words, we need to add up a list of nested CASE statements and then logit-transform the result.</p>
+<p>Note that in the below we make use of the R ‘whisker’ package. This logic-less templating language is a great way to easily transform associative-arrays into SQL that contains easily identifiable labels as placeholderd. We find this more readable than sequences of ‘paste’ statements.</p>
+<pre class="r"><code>xgb_sql_score_query &lt;- function(list_of_trees, features_table, feature_dict, key_field = &quot;id&quot;){
+  
+  # a swap list to render queries via whisker
+  swap &lt;- list(
+    key_field = key_field,
+    features_table = features_table
+  )
+    
+  # score_queries contains the score query for each tree in the list_of_trees
+  score_queries &lt;- lapply(list_of_trees, function(tree){
+    xgb_tree_sql(tree, feature_dict)
+  })
+  # the query clause to sum the scores from each tree 
+  swap$sum_of_scores &lt;- paste(score_queries, collapse=&#39; + &#39;)
+        
+  # score query that logit-transforms the sum_of_scores 
+  q &lt;- &quot;
+    SELECT
+      {{{key_field}}},
+      1/(1+exp(-1*( {{{sum_of_scores}}} ))) AS score
+    FROM `{{{features_table}}}`
+  &quot;
+  return(whisker.render(q,swap))
+}</code></pre>
+<p>We are now ready to generate the score query from our model:</p>
+<pre class="r"><code>queries &lt;- xgb_sql_score_query(
+  model trees, 
+  &#39;mydataset.my_feature_table&#39;,
+  feature_dict
+)
+for(q in queries){
+  # example: run the query with the R bigrquery package
+  bq_project_query(&#39;my_project&#39;, q)
+}</code></pre>
+<p>In summary, production models typically calculate predictions for <strong>all subjects</strong> on a daily, hourly, or even more frequent basis, however moving feature data between a database and a local “scoring” machine is expensive and slow. Transfering the scoring calculations to run within the database, as we’ve shown above, can significantly reduce both cost and run-time.</p>
+<p>The astute reader may notice that, depending on the database, this will work for a limited number of trees. When that becomes a problem, it is possible to add another layer that stores the summed scores for batches of trees as views or tables and then aggregates their results. Beyond that, when queries with views become too long, it is possible to add an additional layer than aggregates batches of views into tables. These extensions are both left as an optional excercises for the reader.</p>
+<p>Note: Since xgboost converts data internally to 32-bit, this procedure assumes that the data you are working with are stored as 32-bit floats. See <a href="https://github.com/dmlc/xgboost/issues/4097" class="uri">https://github.com/dmlc/xgboost/issues/4097</a>.</p>
