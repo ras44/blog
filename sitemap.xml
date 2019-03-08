@@ -13,6 +13,11 @@
   </url>
   
   <url>
+    <loc>/about.html</loc>
+    <lastmod>2016-05-05T21:48:51-07:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/categories.html</loc>
     <priority>0</priority>
   </url>

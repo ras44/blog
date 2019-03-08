@@ -76,7 +76,7 @@
 <h2>Introduction</h2>
 <p>Companies using Google BigQuery for production analytics often run into the following problem: the company has a large user hit table that spans many years. Since queries are billed based on the fields accessed, and not on the date-ranges queried, queries on the table are billed for all available days and are increasingly wasteful.</p>
 <div class="figure">
-<img src="../../../post/2018-05-02-cost-effective-partitioning-in-bigquery-with-r_files/180502_partition.png" alt="Partitioning Tables" />
+<img src="../../../post/2018-05-02-cost-effective-partitioning-in-bigquery-with-r_files/180502_partition.png" alt="Partitioning Tables" width="700" />
 <p class="caption">Partitioning Tables</p>
 </div>
 <p>A solution is to partition the table by date, so that users can query a particular range of dates; saving costs and decreasing query duration. Partitioning an un-partitioned table can be expensive if done the brute-force way. This article explores one cost-effective partitioning method, and uses the <a href="https://github.com/ras44/condusco">condusco</a> R Package to automate the query generation and partitioning steps.</p>

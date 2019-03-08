@@ -12,7 +12,7 @@
     
     
     <item>
-      <title>In-database xgboost predictions with R</title>
+      <title>In-database xgboost Predictions with R</title>
       <link>/2018/10/18/in-database-xgboost-predictions-with-r.html</link>
       <pubDate>Thu, 18 Oct 2018 00:00:00 +0000</pubDate>
       
@@ -31,6 +31,15 @@ xgboost(docs) is a popular R package for classification and regression, and the 
 Introduction Companies using Google BigQuery for production analytics often run into the following problem: the company has a large user hit table that spans many years. Since queries are billed based on the fields accessed, and not on the date-ranges queried, queries on the table are billed for all available days and are increasingly wasteful.
 Partitioning Tables
  A solution is to partition the table by date, so that users can query a particular range of dates; saving costs and decreasing query duration.</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>/about.html</link>
+      <pubDate>Thu, 05 May 2016 21:48:51 -0700</pubDate>
+      
+      <guid>/about.html</guid>
+      <description>This is a &amp;ldquo;hello world&amp;rdquo; example website for the blogdown package. The theme was forked from @jrutheiser/hugo-lithium-theme and modified by Yihui Xie.</description>
     </item>
     
   </channel>
