@@ -1,0 +1,54 @@
+---
+title: Why I use a fixed version of R
+author: Roland Stevenson
+date: '2019-01-05'
+slug: why-i-use-a-fixed-version-of-r
+categories: []
+tags: []
+---
+
+
+
+<p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-01-05-why-i-use-a-fixed-version-of-r.Rmd">edit</a></p>
+<p>Note: As with most of my articles, discussion is linux- and cloud-oriented.</p>
+<div id="why-do-i-use-a-fixed-version-of-r" class="section level2">
+<h2>Why do I use a fixed version of R?</h2>
+<p>I will keep the motivation for <a href="https://semver.org/">good versioning</a> and <a href="http://adv-r.had.co.nz/Reproducibility.html">reproducibility</a> as short as possible: R projects evolve over time, as do the packages that they rely on. If you choose not to control package versions used in your R project, your code will eventually break and/or not be <a href="https://en.wikipedia.org/wiki/Replication_crisis">reproducible</a><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. These issues can also arise if you share your project with another user who has different versions of the required libraries installed at the system- or user-level.</p>
+</div>
+<div id="packrat-manages-package" class="section level2">
+<h2>Packrat manages package</h2>
+<p>I use <a href="https://rstudio.github.io/packrat/">Packrat</a> to control package vesions. It is already integrated with RStudio. Packrat ensures that all installed packages are stored <em>with</em> the project<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. Packrat also ensures that these packages are loaded when a project is opened. With Packrat, I know that project A will always use ggplot2 2.5.0 and project B will always use ggplot2 2.5.0. This is important if I want to be able to reproduce results in the future.</p>
+</div>
+<div id="packrat-package-paths" class="section level2">
+<h2>Packrat package paths</h2>
+<p>Packrat stores compiled packages in <code>packrat/lib/&lt;LINUX_FLAVOR&gt;/&lt;R_VERSION&gt;</code>, an R-version-specific path, relative to the project’s base directory. An issue arises if I am using R version 3.5.0 one week and then system upgrades to R version 3.5.1 the next week: a Packrat project will not find the 3.5.0 libraries anymore, and I will need to rebuild all the packages I need to install them in the 3.5.1 path.</p>
+<p>The easiest solution is to bind a fixed R version to the instance<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>:</p>
+<ul>
+<li><a href="https://github.com/ras44/rstudio-instance">rstudio-instance</a> contains branches with scripts to set up a linux instance with fixed R and RStudio versions. I <code>git clone</code> the repo and <code>git checkout</code> the branch suitable for the linux flavor, R-version, and RStudio version I want. The scripts also ensure R is not auto-updated in the future.</li>
+<li>Once my fixed-R instance is set up, <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> contains an R-version specific base project with pre-built, Packrat-managed, fixed-versions of many popular data-science packages<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>.</li>
+<li>I <code>git clone</code> <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> to a new project directory locally and remove the existing <code>.git</code> directory so that I can turn it into a new .git repo with <code>git init</code>.</li>
+<li>I open the project in RStudio and begin work. All packages are pre-built, so I don’t have to go through lengthy installs. I can upgrade packages in the <code>Packrat Library</code> of the “Packages” tab, and then run <code>packrat::snapshot()</code> to save the new libraries into my project’s <code>packrat/</code> directory.</li>
+<li>If I ever need to duplicate results, I can always build the same fixed-R instance, clone the project I created, and know that it will work exactly the same as when I previously worked on it… sometimes years earlier.</li>
+</ul>
+</div>
+<div id="why-i-use-a-fixed-version-of-r" class="section level2">
+<h2>Why I use a fixed version of R</h2>
+<ul>
+<li>I want to ensure reproducibility and make sharing easier.</li>
+<li>I don’t want to use docker containers<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a>.</li>
+<li>I do not want or need to upgrade to the “latest” version of R: everything I’m doing works fine with the current versions and I want it to stay that way.</li>
+<li>Packrat ensures my project always uses the package versions stored with the project.</li>
+<li>Packrat stores packages in R-version-dependent paths.</li>
+<li>Using a fixed version of R ensures projects and packages remain tied to the R version.</li>
+</ul>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Unless you somehow exclusively use packages that are never updated, never implement version-breaking/major version updates, or always provide backwards-compatible version upgrades. Many R packages are in major version 0, meaning there is no guarantee that a future release will maintain the same API.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>In the <code>packrat/</code> directory<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>It <a href="https://support.rstudio.com/hc/en-us/articles/215488098-Installing-multiple-versions-of-R-on-Linux">is possible</a> to have multiple R versions installed on a system, however I’ve avoided that for simplicity<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>rstudio-project contains all packages in the anaconda distribution and more<a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>docker containers may be a good alternate solution, but in this case we are not using them<a href="#fnref5">↩</a></p></li>
+</ol>
+</div>
