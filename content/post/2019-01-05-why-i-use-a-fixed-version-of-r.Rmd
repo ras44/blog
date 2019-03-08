@@ -9,13 +9,15 @@ tags: []
 
 [edit](https://github.com/ras44/blog/edit/master/content/post/2019-01-05-why-i-use-a-fixed-version-of-r.Rmd)
 
-Note: As with most of my articles, discussion is linux- and cloud-oriented.
+The below article refers to setting up R and RStudio on a cloud linux instance in a way that ensures R project reproducibility and facilitates collaboration.
 
 ## Why do I use a fixed version of R?
 
-I will keep the motivation for [good versioning](https://semver.org/) and [reproducibility](http://adv-r.had.co.nz/Reproducibility.html) as short as possible:  R projects evolve over time, as do the packages that they rely on.  If you choose not to control package versions used in your R project, your code will eventually break and/or not be [reproducible](https://en.wikipedia.org/wiki/Replication_crisis)[^1].  These issues can also arise if you share your project with another user who has different versions of the required libraries installed at the system- or user-level.
+I will keep the motivation for [good versioning](https://semver.org/) and [reproducibility](http://adv-r.had.co.nz/Reproducibility.html) short:  R projects evolve over time, as do the packages that they rely on.  R projects that do not control package versions will eventually break and/or not be [reproducible](https://en.wikipedia.org/wiki/Replication_crisis)[^1].
 
-## Packrat manages package
+These issues can also arise when sharing a project with another user who has different versions of the required libraries installed at the system or user level. Controlling the versions of both code and package dependencies is essential for reproducibilty and collaboration, and the solution is to control package versions at the project level.
+
+## Packrat manages package dependencies
 
 I use [Packrat](https://rstudio.github.io/packrat/) to control package vesions.  It is already integrated with RStudio.  Packrat ensures that all installed packages are stored *with* the project[^2].  Packrat also ensures that these packages are loaded when a project is opened.  With Packrat, I know that project A will always use ggplot2 2.5.0 and project B will always use ggplot2 2.5.0.  This is important if I want to be able to reproduce results in the future.
 
@@ -32,7 +34,7 @@ The easiest solution is to bind a fixed R version to the instance[^5]:
 * If I ever need to duplicate results, I know can always build the same fixed-R instance, clone the project I created, and know that it will work exactly the same as when I previously worked on it... sometimes years earlier.
 
 ## Why I use a fixed version of R
-* I want to ensure reproducibility and make sharing easier.
+* I want to ensure reproducibility and make collaboration easier.
 * I don't want to use docker containers[^4].
 * I do not want or need to upgrade to the "latest" version of R: everything I'm doing works fine with the current versions and I want it to stay that way.
 * Packrat ensures my project always uses the package versions stored with the project.

@@ -10,13 +10,14 @@ tags: []
 
 
 <p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-01-05-why-i-use-a-fixed-version-of-r.Rmd">edit</a></p>
-<p>Note: As with most of my articles, discussion is linux- and cloud-oriented.</p>
+<p>The below article refers to setting up R and RStudio on a cloud linux instance in a way that ensures R project reproducibility and facilitates collaboration.</p>
 <div id="why-do-i-use-a-fixed-version-of-r" class="section level2">
 <h2>Why do I use a fixed version of R?</h2>
-<p>I will keep the motivation for <a href="https://semver.org/">good versioning</a> and <a href="http://adv-r.had.co.nz/Reproducibility.html">reproducibility</a> as short as possible: R projects evolve over time, as do the packages that they rely on. If you choose not to control package versions used in your R project, your code will eventually break and/or not be <a href="https://en.wikipedia.org/wiki/Replication_crisis">reproducible</a><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. These issues can also arise if you share your project with another user who has different versions of the required libraries installed at the system- or user-level.</p>
+<p>I will keep the motivation for <a href="https://semver.org/">good versioning</a> and <a href="http://adv-r.had.co.nz/Reproducibility.html">reproducibility</a> short: R projects evolve over time, as do the packages that they rely on. R projects that do not control package versions will eventually break and/or not be <a href="https://en.wikipedia.org/wiki/Replication_crisis">reproducible</a><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<p>These issues can also arise when sharing a project with another user who has different versions of the required libraries installed at the system or user level. Controlling the versions of both code and package dependencies is essential for reproducibilty and collaboration, and the solution is to control package versions at the project level.</p>
 </div>
-<div id="packrat-manages-package" class="section level2">
-<h2>Packrat manages package</h2>
+<div id="packrat-manages-package-dependencies" class="section level2">
+<h2>Packrat manages package dependencies</h2>
 <p>I use <a href="https://rstudio.github.io/packrat/">Packrat</a> to control package vesions. It is already integrated with RStudio. Packrat ensures that all installed packages are stored <em>with</em> the project<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. Packrat also ensures that these packages are loaded when a project is opened. With Packrat, I know that project A will always use ggplot2 2.5.0 and project B will always use ggplot2 2.5.0. This is important if I want to be able to reproduce results in the future.</p>
 </div>
 <div id="packrat-package-paths" class="section level2">
@@ -34,7 +35,7 @@ tags: []
 <div id="why-i-use-a-fixed-version-of-r" class="section level2">
 <h2>Why I use a fixed version of R</h2>
 <ul>
-<li>I want to ensure reproducibility and make sharing easier.</li>
+<li>I want to ensure reproducibility and make collaboration easier.</li>
 <li>I don’t want to use docker containers<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a>.</li>
 <li>I do not want or need to upgrade to the “latest” version of R: everything I’m doing works fine with the current versions and I want it to stay that way.</li>
 <li>Packrat ensures my project always uses the package versions stored with the project.</li>
