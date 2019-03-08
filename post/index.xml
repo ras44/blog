@@ -6,10 +6,21 @@
     <description>Recent content in Posts on Roland&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 18 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 05 Jan 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Why I use a fixed version of R</title>
+      <link>/2019/01/05/why-i-use-a-fixed-version-of-r.html</link>
+      <pubDate>Sat, 05 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/01/05/why-i-use-a-fixed-version-of-r.html</guid>
+      <description>edit
+Note: As with most of my articles, discussion is linux- and cloud-oriented.
+Why do I use a fixed version of R? I will keep the motivation for good versioning and reproducibility as short as possible: R projects evolve over time, as do the packages that they rely on. If you choose not to control package versions used in your R project, your code will eventually break and/or not be reproducible1.</description>
+    </item>
     
     <item>
       <title>In-database xgboost Predictions with R</title>

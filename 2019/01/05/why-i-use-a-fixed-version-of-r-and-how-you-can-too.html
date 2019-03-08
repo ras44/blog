@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.54.0" />
+
+
+<title>Why I use a fixed version of R and how you can too - Roland&#39;s Blog</title>
+<meta property="og:title" content="Why I use a fixed version of R and how you can too - Roland&#39;s Blog">
+
+
+  <link href='../../../favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+<link rel="stylesheet" href="../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../" class="nav-logo">
+    <img src="../../../images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="https://github.com/ras44">GitHub</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">3 min read</span>
+    
+
+    <h1 class="article-title">Why I use a fixed version of R and how you can too</h1>
+
+    
+    <span class="article-date">2019-01-05</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-01-05-why-i-use-a-fixed-version-of-r-and-how-you-can-too.Rmd">edit</a></p>
+<p>Note: As with most of my articles, discussion is linux and cloud specific.</p>
+<div id="why-do-i-use-a-fixed-version-of-r" class="section level2">
+<h2>Why do I use a fixed version of R?</h2>
+<p>I’m going to keep the motivation for <a href="https://semver.org/">good versioning</a> as short as possible: R projects evolve over time, as do the packages that they rely on. If you don’t control the versions of packages used in your project, your code will eventually break<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>. Further, if you share your project with another user who is using different versions of the required libraries, the code can break.</p>
+</div>
+<div id="so-why-do-i-use-a-fixed-version-of-r" class="section level2">
+<h2>So why do I use a fixed version of R?</h2>
+<p>I’ve chosen to use <a href="https://rstudio.github.io/packrat/">packrat</a> as my dependency management system, since it is already integrated with RStudio Server. packrat ensures that all installed packages are stored <em>within the project directory</em><a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. packrat also ensures that these packages are loaded when your project is opened. With packrat, I can open project A and know that it will always be using ggplot2 version 2.5.0. Then I can switch to project B and know that it will always use ggplot2 version 2.5.0. This is important if I want to be able to reproduce results in the future.</p>
+</div>
+<div id="so-why-do-i-use-a-fixed-version-of-r-1" class="section level2">
+<h2>So why do I use a fixed version of R?</h2>
+<p>packrat actually stores the packages in <code>packrat/lib/&lt;LINUX_FLAVOR&gt;/&lt;R_VERSION&gt;</code>, an R-version-specific path. So if I am using R version 3.5.0 one week, and then the instance’s linux package manager (ie. <code>yum</code> or <code>apt-get</code>) decides to upgrade R to version 3.5.1 the next week, a packrat project will not find the libraries anymore. So here’s my solution:</p>
+<ul>
+<li>This <a href="https://github.com/ras44/rstudio-instance">rstudio-instance</a> contains branches with scripts to set up a linux instance with fixed R and RStudio versions. I clone the repo and checkout the branch suitable for the linux flavor, R-version, and RStudio version I want.</li>
+<li>Once my fixed-R instance is set up, <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> contains an R-version specific base project with pre-built, packrat-managed, fixed-versions of many popular data-science packages<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>.</li>
+<li>I clone <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> to a new project directory and remove the existing <code>.git</code> directory so that I can turn it into a new .git repo.</li>
+<li>I open the project in RStudio and begin work. I can upgrade packages in the <code>Packrat Library</code> of the “Packages” tab, and then run <code>packrat::snapshot()</code> to save the new libraries into my project’s <code>packrat/</code> directory.</li>
+<li>If I ever need to duplicate results, I can always build the same fixed-R instance, clone the project I created, and know that it will work exactly the same as when I previously worked on it… sometimes years earlier.</li>
+</ul>
+</div>
+<div id="why-i-use-a-fixed-version-of-r" class="section level2">
+<h2>Why I use a fixed version of R</h2>
+<p>I do not want to upgrade to the “latest” version, because everything I’m doing works fine with the current versions and I want it to stay that way.</p>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Unless you somehow exclusively use packages that are never updated, never implement version-breaking/major version updates, or always provide backwards-compatible version upgrades. Many R packages are in major version 0, meaning there is no guarantee that a future release will maintain the same API.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>In the <code>packrat/</code> directory<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>rstudio-project contains all packages in the anaconda distribution and more<a href="#fnref3">↩</a></p></li>
+</ol>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+    
+
+    
+  </body>
+</html>
+

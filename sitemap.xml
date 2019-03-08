@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/2019/01/05/why-i-use-a-fixed-version-of-r.html</loc>
+    <lastmod>2019-01-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/10/18/in-database-xgboost-predictions-with-r.html</loc>
     <lastmod>2018-10-18T00:00:00+00:00</lastmod>
   </url>
@@ -13,24 +18,19 @@
   </url>
   
   <url>
-    <loc>/about.html</loc>
-    <lastmod>2016-05-05T21:48:51-07:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/categories.html</loc>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/post.html</loc>
-    <lastmod>2018-10-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2018-10-18T00:00:00+00:00</lastmod>
+    <lastmod>2019-01-05T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
