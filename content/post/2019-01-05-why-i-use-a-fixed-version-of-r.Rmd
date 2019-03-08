@@ -27,9 +27,9 @@ The easiest solution is to bind a fixed R version to the instance[^5]:
 
 * [rstudio-instance](https://github.com/ras44/rstudio-instance) contains branches with scripts to set up a linux instance with fixed R and RStudio versions.  I `git clone` the repo and `git checkout` the branch suitable for the linux flavor, R-version, and RStudio version I want.  The scripts also ensure R is not auto-updated in the future.
 * Once my fixed-R instance is set up, [rstudio-project](https://github.com/ras44/rstudio-project) contains an R-version specific base project with pre-built, Packrat-managed, fixed-versions of many popular data-science packages[^3].
-* I `git clone` [rstudio-project](https://github.com/ras44/rstudio-project) to a new project directory locally and remove the existing `.git` directory so that I can turn it into a new .git repo with `git init`.
-* I open the project in RStudio and begin work.  All packages are pre-built, so I don't have to go through lengthy installs.  I can upgrade packages in the `Packrat Library` of the "Packages" tab, and then run `packrat::snapshot()` to save the new libraries into my project's `packrat/` directory.
-* If I ever need to duplicate results, I can always build the same fixed-R instance, clone the project I created, and know that it will work exactly the same as when I previously worked on it... sometimes years earlier.
+* I `git clone` [rstudio-project](https://github.com/ras44/rstudio-project) to a new project directory locally and remove the existing `.git` directory so that I can turn it into a new git repo with `git init`.
+* I open the project in RStudio and begin work.  All packages are pre-built, so I don't have to go through lengthy installs.  I can upgrade packages in the `Packrat Library` of the "Packages" tab, and then run `packrat::snapshot()` to save the any libraries and ugrades into my project's `packrat/` directory.
+* If I ever need to duplicate results, I know can always build the same fixed-R instance, clone the project I created, and know that it will work exactly the same as when I previously worked on it... sometimes years earlier.
 
 ## Why I use a fixed version of R
 * I want to ensure reproducibility and make sharing easier.
