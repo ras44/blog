@@ -1,6 +1,6 @@
 baseurl = "/"
 languageCode = "en-us"
-title = "A Hugo website"
+title = "Roland's Blog"
 theme = "hugo-lithium"
 googleAnalytics = ""
 disqusShortname = ""
@@ -12,17 +12,11 @@ uglyURLs = true
     post = "/:year/:month/:day/:slug/"
 
 [[menu.main]]
-    name = "About"
-    url = "/about/"
-[[menu.main]]
     name = "GitHub"
-    url = "https://github.com/rstudio/blogdown"
-[[menu.main]]
-    name = "Twitter"
-    url = "https://twitter.com/rstudio"
+    url = "https://github.com/ras44"
 
 [params]
-    description = "A website built through Hugo and blogdown."
+    description = "Roland's Blog"
 
     # options for highlight.js (version, additional languages, and theme)
     highlightjsVersion = "9.12.0"
@@ -41,4 +35,4 @@ uglyURLs = true
     width = 50
     height = 50
     alt = "Logo"
-
+    
