@@ -6,13 +6,23 @@
     <description>Recent content in Posts on Roland&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 05 Jan 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 19 Jan 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Why I use a fixed version of R</title>
+      <title>Keeping Credentials Secret with Keyrings in R</title>
+      <link>/2019/01/19/keeping-credentials-secret-with-keyrings-in-r.html</link>
+      <pubDate>Sat, 19 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/01/19/keeping-credentials-secret-with-keyrings-in-r.html</guid>
+      <description>edit
+Keeping credentials secret API keys and database passwords are two examples of common credentials that users usually want to keep secret. The following is an example of how to use the R keyrings package to store encrypted credentials locally1. To do this, we only have to install and load the keyring package2 and define three strings: the keyring name, a keyring service, and the username that we want to associate our secret credentials with.</description>
+    </item>
+    
+    <item>
+      <title>Why I Use a Fixed Version of R</title>
       <link>/2019/01/05/why-i-use-a-fixed-version-of-r.html</link>
       <pubDate>Sat, 05 Jan 2019 00:00:00 +0000</pubDate>
       
