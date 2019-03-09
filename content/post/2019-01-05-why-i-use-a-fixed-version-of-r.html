@@ -1,5 +1,5 @@
 ---
-title: Why I use a fixed version of R
+title: Why I Use a Fixed Version of R
 author: Roland Stevenson
 date: '2019-01-05'
 slug: why-i-use-a-fixed-version-of-r
@@ -31,6 +31,15 @@ tags: []
 <li>I open the project in RStudio and begin work. All packages are pre-built, so I don’t have to go through lengthy installs. I can upgrade packages in the <code>Packrat Library</code> of the “Packages” tab, and then run <code>packrat::snapshot()</code> to save the any libraries and ugrades into my project’s <code>packrat/</code> directory.</li>
 <li>If I ever need to duplicate results, I know can always build the same fixed-R instance, clone the project I created, and know that it will work exactly the same as when I previously worked on it… sometimes years earlier.</li>
 </ul>
+<p>Here is a quick example script showing the workflow:</p>
+<pre><code>git clone git@github.com:ras44/rstudio-instance.git
+cd rstudio-instance
+git checkout centos_7_R3.5.0_RSS1.1.453
+./install.sh
+sudo passwd &lt;USERNAME&gt; # set user password for RStudio Server login
+cd
+git clone git@github.com:ras44/rstudio-project.git
+cd rstudio-project</code></pre>
 </div>
 <div id="why-i-use-a-fixed-version-of-r" class="section level2">
 <h2>Why I use a fixed version of R</h2>

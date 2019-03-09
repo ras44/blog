@@ -1,5 +1,5 @@
 ---
-title: Why I use a fixed version of R
+title: Why I Use a Fixed Version of R
 author: Roland Stevenson
 date: '2019-01-05'
 slug: why-i-use-a-fixed-version-of-r
@@ -32,6 +32,20 @@ The easiest solution is to bind a fixed R version to the instance[^5]:
 * I `git clone` [rstudio-project](https://github.com/ras44/rstudio-project) to a new project directory locally and remove the existing `.git` directory so that I can turn it into a new git repo with `git init`.
 * I open the project in RStudio and begin work.  All packages are pre-built, so I don't have to go through lengthy installs.  I can upgrade packages in the `Packrat Library` of the "Packages" tab, and then run `packrat::snapshot()` to save the any libraries and ugrades into my project's `packrat/` directory.
 * If I ever need to duplicate results, I know can always build the same fixed-R instance, clone the project I created, and know that it will work exactly the same as when I previously worked on it... sometimes years earlier.
+
+Here is a quick example script showing the workflow:
+```
+git clone git@github.com:ras44/rstudio-instance.git
+cd rstudio-instance
+git checkout centos_7_R3.5.0_RSS1.1.453
+./install.sh
+sudo passwd <USERNAME> # set user password for RStudio Server login
+cd
+git clone git@github.com:ras44/rstudio-project.git
+cd rstudio-project
+```
+
+
 
 ## Why I use a fixed version of R
 * I want to ensure reproducibility and make collaboration easier.
