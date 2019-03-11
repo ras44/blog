@@ -15,7 +15,7 @@ tags: []
 
 We will keep the motivation for [good versioning](https://semver.org/) and [reproducibility](http://adv-r.had.co.nz/Reproducibility.html) short:  R projects evolve over time, as do the packages that they rely on.  R projects that do not control package versions will eventually break and/or not be [reproducible](https://en.wikipedia.org/wiki/Replication_crisis)[^1].
 
-These issues can also arise when sharing a project with another user who has different versions of the required libraries installed at the system or user level. Controlling package version is essential for reproducibilty and collaboration, and the solution is to control package versions at the project level.
+These issues can also arise when sharing a project with another user who has different versions of the required libraries installed at the system or user level. Controlling package versions is essential for reproducibilty and collaboration, and the solution is to control package versions at the project level.
 
 ## Packrat manages package dependencies
 
