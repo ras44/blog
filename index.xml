@@ -22,14 +22,13 @@ Keeping credentials secret API keys and database passwords are two examples of c
     </item>
     
     <item>
-      <title>Why I Use a Fixed Version of R</title>
-      <link>/2019/01/05/why-i-use-a-fixed-version-of-r.html</link>
+      <title>Using a Fixed Version of R on Linux</title>
+      <link>/2019/01/05/using-a-fixed-version-of-r-on-linux.html</link>
       <pubDate>Sat, 05 Jan 2019 00:00:00 +0000</pubDate>
       
-      <guid>/2019/01/05/why-i-use-a-fixed-version-of-r.html</guid>
+      <guid>/2019/01/05/using-a-fixed-version-of-r-on-linux.html</guid>
       <description>edit
-The below article refers to setting up R and RStudio on a cloud linux instance in a way that ensures R project reproducibility and facilitates collaboration.
-Why do I use a fixed version of R? I will keep the motivation for good versioning and reproducibility short: R projects evolve over time, as do the packages that they rely on. R projects that do not control package versions will eventually break and/or not be reproducible1.</description>
+ The below article refers to setting up R and RStudio Server on a cloud Linux instance in a way that ensures R project reproducibility and facilitates collaboration. Many possible workflows exist to accomplish this. One might call the below presentation an “opinionated” solution based on what we have found to work in a production environment. Importantly, all development is on an RStudio Server cloud Linux instance, ensuring that we only have to support one operating system.</description>
     </item>
     
     <item>
