@@ -1,0 +1,67 @@
+---
+title: Using a Fixed Version of R on Linux
+author: Roland Stevenson
+date: '2019-01-05'
+slug: using-a-fixed-version-of-r-on-linux
+categories: []
+tags: []
+---
+
+
+
+<p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-01-05-why-i-use-a-fixed-version-of-r.Rmd">edit</a></p>
+<blockquote>
+<p>The below article refers to setting up R and RStudio Server on a cloud Linux instance in a way that ensures R project reproducibility and facilitates collaboration. Many possible workflows exist to accomplish this. One might call the below presentation an “opinionated” solution based on what we have found to work in a production environment. Importantly, all development is on an RStudio Server cloud Linux instance, ensuring that we only have to support one operating system.</p>
+</blockquote>
+<div id="using-a-fixed-version-of-r-on-linux-to-facilitate-reproducibility-and-collaboration" class="section level2">
+<h2>Using a Fixed Version of R on Linux to Facilitate Reproducibility and Collaboration</h2>
+<p>We will keep the motivation for <a href="https://semver.org/">good versioning</a> and <a href="http://adv-r.had.co.nz/Reproducibility.html">reproducibility</a> short: R projects evolve over time, as do the packages that they rely on. R projects that do not control package versions will eventually break and/or not be <a href="https://en.wikipedia.org/wiki/Replication_crisis">reproducible</a><a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<p>These issues can also arise when sharing a project with another user who has different versions of the required libraries installed at the system or user level. Controlling package version is essential for reproducibilty and collaboration, and the solution is to control package versions at the project level.</p>
+</div>
+<div id="packrat-manages-package-dependencies" class="section level2">
+<h2>Packrat manages package dependencies</h2>
+<p>We use <a href="https://rstudio.github.io/packrat/">Packrat</a> to control package vesions. It is already integrated with RStudio Server. Packrat ensures that all installed packages are stored <em>with</em> the project<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. Packrat also ensures that these packages are available when a project is opened. With Packrat, we know that project A will always use ggplot2 2.5.0 and project B will always use ggplot2 2.5.0. This is important if we want to be able to reproduce results in the future.</p>
+</div>
+<div id="packrat-package-paths" class="section level2">
+<h2>Packrat package paths</h2>
+<p>Packrat stores compiled packages in <code>packrat/lib/&lt;LINUX_FLAVOR&gt;/&lt;R_VERSION&gt;</code>, an R-version-specific path, relative to the project’s base directory. An issue arises if we are using R version 3.5.0 one week and then upgrade to R 3.5.1 the next week: a Packrat project will not find the 3.5.0 libraries anymore, and we will need to rebuild all the packages to install them in the 3.5.1 path.</p>
+<p>The easiest solution is to bind a fixed R version to an instance<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>. Here’s what we’ve done to accomplish this:</p>
+<ul>
+<li><a href="https://github.com/ras44/rstudio-instance">rstudio-instance</a> contains branches with scripts to set up a Linux instance with fixed R and RStudio versions. We <code>git clone</code> the repo and <code>git checkout</code> the branch suitable for the Linux flavor, R-version, and RStudio version we want. The scripts also ensure R is not auto-updated in the future.</li>
+<li>We then run the install script to set up the instance and archive an image of it for future use.</li>
+<li>Once the fixed-R instance is set up, <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> contains an R-version specific base project with pre-built, Packrat-managed, fixed-versions of many popular data-science packages<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a>.</li>
+<li>We <code>git clone</code> <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> to a new project directory locally and remove the existing <code>.git</code> directory so that I can turn it into a new git repo with <code>git init</code>.</li>
+<li>We open the project in RStudio and begin work. All packages are pre-built, so we don’t have to go through lengthy installs. We can upgrade packages in the <code>Packrat Library</code> of the “Packages” tab, and then run <code>packrat::snapshot()</code> to save the any libraries and ugrades into the project’s <code>packrat/</code> directory. We can then <code>git add packrat</code> to add any packrat updates to the project’s git repo.</li>
+<li>If we ever need to duplicate results, we can always build the same fixed-R instance (or clone the image we stored earlier), clone the project on the instance, and know that it will work exactly the same as when we previously worked on it… sometimes years earlier.</li>
+</ul>
+<p>Here is a quick example script showing the workflow:</p>
+<pre><code>git clone git@github.com:ras44/rstudio-instance.git
+cd rstudio-instance
+git checkout centos7_R3.5.0_RSS1.1.453
+./install.sh
+sudo passwd &lt;USERNAME&gt; # set user password for RStudio Server login
+cd
+git clone git@github.com:ras44/rstudio-project.git
+cd rstudio-project</code></pre>
+</div>
+<div id="why-i-use-a-fixed-version-of-r" class="section level2">
+<h2>Why I use a fixed version of R</h2>
+<ul>
+<li>I want to ensure reproducibility and make collaboration easier.</li>
+<li>I don’t want to use docker containers<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a>.</li>
+<li>I do not want or need to upgrade to the “latest” version of R: everything I’m doing works fine with the current versions and I want it to stay that way.</li>
+<li>Packrat ensures my project always uses the package versions stored with the project.</li>
+<li>Packrat stores packages in R-version-dependent paths.</li>
+<li>Using a fixed version of R ensures projects and packages remain tied to the R version.</li>
+</ul>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Unless you somehow exclusively use packages that are never updated, never implement version-breaking/major version updates, or always provide backwards-compatible version upgrades. Many R packages are in major version 0, meaning there is no guarantee that a future release will maintain the same API.<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>In the <code>packrat/</code> directory<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>It <a href="https://support.rstudio.com/hc/en-us/articles/215488098-Installing-multiple-versions-of-R-on-Linux">is possible</a> to have multiple R versions installed on a system, however I’ve avoided that for simplicity<a href="#fnref3">↩</a></p></li>
+<li id="fn4"><p>rstudio-project contains all packages in the anaconda distribution and more<a href="#fnref4">↩</a></p></li>
+<li id="fn5"><p>docker containers may be a good alternate solution, but in this case we are not using them<a href="#fnref5">↩</a></p></li>
+</ol>
+</div>
