@@ -18,7 +18,10 @@
       
       <guid>/2019/01/19/keeping-credentials-secret-with-keyrings-in-r.html</guid>
       <description>edit
-Keeping credentials secret API keys and database passwords are two examples of common credentials that users usually want to keep secret. The following is an example of how to use the R keyrings package to store encrypted credentials locally1. To do this, we only have to install and load the keyring package2 and define three strings: the keyring name, a keyring service, and the username that we want to associate our secret credentials with.</description>
+Keeping credentials secret When accessing an API or database in R, it is often necessary to provide credentials such as login name and password.
+Figure: Providing credentials via an interactive prompt
+ Often it is also more convenient to provide credentials programatically in an R script, but best practices1 state:
+ As with every programming language, it is important to avoid publishing code with your credentials in plain text.</description>
     </item>
     
     <item>
