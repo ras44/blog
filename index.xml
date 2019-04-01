@@ -6,10 +6,21 @@
     <description>Recent content on Roland&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 19 Jan 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 25 Mar 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Understanding how Optimizely Controls Error in A/B Tests with R Part 1</title>
+      <link>/2019/03/25/understanding-how-optimizely-controls-error-in-a-b-tests-with-r.html</link>
+      <pubDate>Mon, 25 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/03/25/understanding-how-optimizely-controls-error-in-a-b-tests-with-r.html</guid>
+      <description>edit
+ I’m neither an employee nor paid-promoter of Optimizely. The views expressed are my own.
+ Optimizely is popular testing platform that makes understanding the results of A/B tests easier for anyone who isn’t well-versed in statistical testing methodologies (and even those who are!). In the below work, we will intentionally leave out statistics theory and attempt to develop an intuitive sense of what is described in Optimizely’s “Always Valid Inference” and “Peeking at A/B Tests” papers.</description>
+    </item>
     
     <item>
       <title>Keeping Credentials Secret with Keyrings in R</title>
