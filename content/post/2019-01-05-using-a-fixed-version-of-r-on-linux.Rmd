@@ -25,15 +25,15 @@ We use [Packrat](https://rstudio.github.io/packrat/) to control package versions
 
 ## Packrat package paths
 
-On Linux, Packrat stores compiled packages in `packrat/lib/<LINUX_FLAVOR>/<R_VERSION>`, an R-version-specific path, relative to the project's base directory.  An issue arises if we are using R version 3.5.0 one week and then upgrade to R 3.5.1 the next week: a Packrat project will not find the 3.5.0 libraries anymore, and we will need to rebuild all the packages to install them in the 3.5.1 path.
+On Linux, Packrat stores compiled packages in `packrat/lib/<LINUX_FLAVOR>/<R_VERSION>`, an R-version-specific path, relative to the project's base directory.  An issue arises if we are using R version 3.5.0 one week and then upgrade to R 3.5.1 the next week: a Packrat project will not find the 3.5.0 libraries anymore, and we will need to rebuild all the packages to install them in the 3.5.1 path.  Packrat will automatically build all packages from source (sources are stored in `packrat/src`) if it notices they are missing, however this process can take tens of minutes, depending on the number of packages being built.  Since this can be cumbersome when collaborating, we also opt to include the `packrat/lib` path in version control, thereby committing the compiled libraries as well.
 
-The easiest solution is to bind a fixed R version to an instance[^5].  Here's what we've done to accomplish this:
+In summary, our solution is to bind one fixed R version to an instance[^5] and release fixed-R instance images periodically.  What we lose by not being on the bleeding edge of (thankfully relatively non-critical) bugfixes we gain in ease of collaboration.  Here's what we've done to accomplish this:
 
 * [rstudio-instance](https://github.com/ras44/rstudio-instance) contains branches with scripts to set up a Linux instance with fixed R and RStudio versions.  We `git clone` the repo and `git checkout` the branch suitable for the Linux flavor, R-version, and RStudio version we want.  The scripts also ensure R is not auto-updated in the future.
 * We then run the install script to set up the instance and archive an image of it for future use.
 * Once the fixed-R instance is set up, [rstudio-project](https://github.com/ras44/rstudio-project) contains an R-version specific base project with pre-built, Packrat-managed, fixed-versions of many popular data-science packages[^3].
 * We `git clone` [rstudio-project](https://github.com/ras44/rstudio-project) to a new project directory locally and remove the existing `.git` directory so that it can be turned it into a new git repo with `git init`.
-* We open the project in RStudio and begin work.  All packages are pre-built, so we don't have to go through lengthy installs.  We can upgrade packages in the `Packrat Library` of the "Packages" tab, and then run `packrat::snapshot()` to save the any libraries and ugrades into the project's `packrat/` directory.  We can then `git add packrat` to add any packrat updates to the project's git repo.
+* We open the project in RStudio and begin work.  All packages are pre-built, so we don't have to go through lengthy installs.  We can upgrade packages in the `Packrat Library` of the "Packages" tab, and then run `packrat::snapshot()` to save any libraries and ugrades into the project's `packrat/` directory.  We can then `git add packrat` to add any packrat updates to the project's git repo.
 * If we ever need to duplicate results, we can always build the same fixed-R instance (or clone the image we stored earlier), clone the project on the instance, and know that it will work exactly the same as when we previously worked on it... sometimes years earlier.
 
 Here is a quick example script showing the workflow:
