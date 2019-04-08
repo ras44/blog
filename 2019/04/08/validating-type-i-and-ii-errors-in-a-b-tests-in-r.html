@@ -6,8 +6,8 @@
 <meta name="generator" content="Hugo 0.54.0" />
 
 
-<title>Understanding how Optimizely Controls Error in A/B Tests with R Part 1 - Roland&#39;s Blog</title>
-<meta property="og:title" content="Understanding how Optimizely Controls Error in A/B Tests with R Part 1 - Roland&#39;s Blog">
+<title>Validating Type I and II Errors in A/B Tests in R - Roland&#39;s Blog</title>
+<meta property="og:title" content="Validating Type I and II Errors in A/B Tests in R - Roland&#39;s Blog">
 
 
   <link href='../../../favicon.ico' rel='icon' type='image/x-icon'/>
@@ -61,22 +61,19 @@
     <span class="article-duration">7 min read</span>
     
 
-    <h1 class="article-title">Understanding how Optimizely Controls Error in A/B Tests with R Part 1</h1>
+    <h1 class="article-title">Validating Type I and II Errors in A/B Tests in R</h1>
 
     
-    <span class="article-date">2019-03-25</span>
+    <span class="article-date">2019-04-08</span>
     
 
     <div class="article-content">
       
 
 
-<p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-03-25-understanding-how-optimizely-controls-error-in-a-b-tests-with-r.Rmd">edit</a></p>
-<blockquote>
-<p>I’m neither an employee nor paid-promoter of Optimizely. The views expressed are my own.</p>
-</blockquote>
-<p>Optimizely is popular testing platform that makes understanding the results of A/B tests easier for anyone who isn’t well-versed in statistical testing methodologies (and even those who are!). In the below work, we will intentionally leave out statistics theory and attempt to develop an intuitive sense of what is described in Optimizely’s “<a href="https://arxiv.org/abs/1512.04922">Always Valid Inference</a>” and “<a href="">Peeking at A/B Tests</a>” papers.</p>
-<p>One of the problems plaguing the analysis of A/B tests is what Optimizely describes as “peeking”. To better understand what “peeking” is, it helps to first understand how to properly run a test. We will focus on the case of testing whether there is a difference between the conversion rates <code>cr_a</code> and <code>cr_b</code> for groups A and B. We define conversion rate as the total number of conversions in a group divided by the total number of subjects.</p>
+<p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-04-08-validating-type-i-and-ii-errors-in-a-b-tests-in-r.Rmd">edit</a></p>
+<p>In the below work, we will intentionally leave out statistics theory and attempt to develop an intuitive sense of what type I and type II errors represent when running A/B tests.</p>
+<p>One of the problems plaguing the analysis of A/B tests today is known as the “peeking problem”. To better understand what “peeking” is, it helps to first understand how to properly run a test. We will focus on the case of testing whether there is a difference between the conversion rates <code>cr_a</code> and <code>cr_b</code> for groups A and B. We define conversion rate as the total number of conversions in a group divided by the total number of subjects.</p>
 <p>In order to correctly run a test, one should first calculate the required sample size by doing a power calculation. This is easily done in R using the <code>pwr</code> library and requires a few parameters: the desired significance level (the false positive rate), the desired statistical power (1-false negative rate), the minimum detectable effect, and the baseline conversion rate <code>cr_a</code>.</p>
 <pre class="r"><code>library(pwr)
 mde &lt;- 0.1
@@ -89,13 +86,15 @@ ptpt &lt;- pwr.2p.test(h = ES.h(p1 = cr_a, p2 = (1+mde)*cr_a),
            power = power
            )
 n_obs &lt;- ceiling(ptpt$n)</code></pre>
-<p>This result tells us is that we need to observe 4860 subjects in each of the A and B test groups. Once we have observed that quantity, we can calculate whether there is a statistically significant difference between the two sets of observations via a t-test.</p>
-<p>Given the parameters we included in our power calculation, there are two things to be aware of:
-- there is a 5% chance that our t-test will predict that there is a statistically significant difference when in fact there isn’t. That is a result of our alpha parameter, which sets a false-positive rate of 5%.
-- there is a 20% chance that the t-test will predict no difference when there actually was a difference, the false-negative rate (or 1-power).</p>
+<p>This result tells us is that we need to observe 4860 subjects in each of the A and B test groups if we want to detect a difference of 10% in their conversion rates. Once we have observed that quantity, we can calculate whether there is a statistically significant difference between the two sets of observations via a t-test.</p>
+<p>Given the parameters we included in our power calculation, there are two things to be aware of:</p>
+<ul>
+<li>there is a 5% chance that our t-test will predict that there is a statistically significant difference when in fact there isn’t. That is a result of our alpha parameter, which sets a false-positive rate of 5%.</li>
+<li>there is a 20% chance that the t-test will predict no difference when there actually was a difference, the false-negative rate (or 1-power).</li>
+</ul>
 <div id="illustrating-alpha-and-beta-parameters" class="section level2">
 <h2>Illustrating alpha and beta parameters</h2>
-<p>Let’s try to illustrate this through a simulation. We’ll simulate two sequences of conversions with conversion rates such that <code>cr_b = (1+mde)*cr_a</code>. We’ll then run a t-test comparing all of the available observations of the two groups each time we have a new pair of observations. If the p-value of the t-test is below 5%, we will reject the null-hypothesis that there is no difference between the distributions; hence, <code>p.value &lt; 0.05</code> implies there is a statistically significant difference between the conversion rates. Finally we’ll plot <code>1-p.value</code> to represent “confidence” relative to where we are in the sequence. This essentially simulates what p-values we would calculate if we were to continually monitor conversions as subjects choose to convert or abandon. We add the 95% confidence line horizontally, as well as a vertical line at <code>n_obs</code>, the number of observations our power calculation says to use to conduct a t-test.</p>
+<p>Let’s try to illustrate this through a simulation. We’ll simulate two sequences of conversions with conversion rates such that <code>cr_b = (1+mde)*cr_a</code>. We’ll then run a t-test comparing all of the available observations of the two groups <strong>each time we have a new pair of observations</strong>. If the p-value of the t-test is below 5%, we will reject the null-hypothesis that there is no difference between the distributions; hence, <code>p.value &lt; 0.05</code> implies there is a statistically significant difference between the conversion rates. Finally we’ll plot <code>1-p.value</code> to represent “confidence” relative to where we are in the sequence. This essentially simulates what p-values we would calculate if we were to continually monitor conversions as subjects choose to convert or abandon. We add the 95% confidence line horizontally, as well as a vertical line at <code>n_obs</code>, the number of observations our power calculation says to use to conduct a t-test.</p>
 <pre class="r"><code>library(ggplot2)
 set.seed(2)
 
@@ -127,9 +126,9 @@ ggplot(tt, aes(x=seq_along(p.value), y=1-p.value)) +
   xlab(&quot;Observation (day)&quot;) +
   scale_color_discrete(name = &quot;Legend&quot;) +
   ylim(c(0,1))</code></pre>
-<p><img src="../../../post/2019-03-25-understanding-how-optimizely-controls-error-in-a-b-tests-with-r_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="../../../post/2019-04-08-validating-type-i-and-ii-errors-in-a-b-tests-in-r_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>We observe that in the above example we would correctly have measured a difference in conversion rates <em>for this particular simulation</em>. However, we should expect that if we run this experiment 100 times, about 20 of those times will result in an incorrect negative prediction due to our false negative rate being 20% (power=80).</p>
-<p>To test this, and many other concepts in this article, we are going to create a utility function that will run a simulation repeatedly:</p>
+<p>To test this, and other concepts in this article, we are going to create a utility function that will run a simulation repeatedly:</p>
 <pre class="r"><code>#
 # monte carlo runs n_simulations and calls the callback function each time with the ... optional args
 #
@@ -140,7 +139,7 @@ monte_carlo &lt;- function(n_simulations, callback, ...){
     callback(...)
   })
 }</code></pre>
-<p>Now, we’ll use the <code>monte_carlo</code> utility function to run 1000 experiments, measuring whether the p.value is less than alpha after <code>n_obs</code> observations. If it is, we reject the null hypothesis. We expect about 800 rejections and about 200 non-rejections, since 200/1000 would represent our expected 20% false negative rate.</p>
+<p>Now, we’ll use the <code>monte_carlo</code> utility function to run 1000 experiments, measuring whether the p.value is less than alpha <strong>after <code>n_obs</code> observations</strong>. If it is, we reject the null hypothesis. We expect about 800 rejections and about 200 non-rejections, since 200/1000 would represent our expected 20% false negative rate.</p>
 <pre class="r"><code>reject_at_i &lt;- function(observations, i){
   conversions_a &lt;- rbinom(observations, 1, cr_a)
   conversions_b &lt;- rbinom(observations, 1, cr_b)
@@ -184,8 +183,8 @@ table(rejected.H0)</code></pre>
 </div>
 <div id="peeking" class="section level2">
 <h2>Peeking</h2>
-<p>What happens if we don’t do a power calculation and instead monitor the conversions as they come in? This is what optimizely calls “peeking”. In other words, to run a test correctly you should only observe the results at one moment: when the power calculation has told you the test is complete. If you look at any moment prior to this, you are peeking at the results.</p>
-<p>Peeking is widespread when it comes to analyzing experiments. In fact, some popular testing services peek continuously and automatically notify as soon as a p-value is below alpha. What you may notice, however, is that p-values can fluctuate around alpha multiple times before “choosing” a side. Continuously monitoring p-values will inflate false positive rates, up to 30%, Optimizely claims. Let’s see what effect continuous peeking has on our false positive rates:</p>
+<p>What happens if we don’t do a power calculation and instead monitor the conversions as they come in? This is what is termed “peeking”. In other words, to run a test correctly you should only observe the results at one moment: when the power calculation has told you the test is complete. If you look at any moment prior to this, you are peeking at the results.</p>
+<p>Peeking is widespread when it comes to analyzing experiments. In fact, some popular testing services peek continuously and automatically notify as soon as a p-value is below alpha. What you may notice, however, is that p-values can fluctuate around alpha multiple times before “choosing” a side, particularly where the size of an effect is small. Continuously monitoring p-values will inflate false positive rates. Let’s see what effect continuous peeking has on our false positive rates:</p>
 <pre class="r"><code>peeking_method &lt;- function (observations, by=1){
   # create the conversions
   conversions_a &lt;- rbinom(observations, 1, cr_a)
@@ -225,7 +224,7 @@ table(rejected.H0)</code></pre>
 ## FALSE  TRUE 
 ##   653   347</code></pre>
 <p>Indeed, even peeking every 100 sets of observations leads to an inflated false positive rate of about 30%! Peeking at test results to make decisions, and especially automating peeking to make decisions, is a big no-no.</p>
-<p>In a subsequent article, we’ll explore what optimizely proposes to resolve the peeking issue.</p>
+<p>In a subsequent article, we’ll explore an alternative way of measuring p-values that is not affected by peeking based on sequential probability ratio tests.</p>
 </div>
 
     </div>
