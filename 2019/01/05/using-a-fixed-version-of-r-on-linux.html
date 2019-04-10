@@ -58,7 +58,7 @@
 
   <article class="article">
     
-    <span class="article-duration">6 min read</span>
+    <span class="article-duration">7 min read</span>
     
 
     <h1 class="article-title">Using a Fixed Version of R on Linux</h1>
@@ -79,6 +79,10 @@
 <h2>Using a fixed version of R on linux to facilitate reproducibility and collaboration</h2>
 <p>We will keep the motivation for <a href="https://semver.org/">good versioning</a> and <a href="http://adv-r.had.co.nz/Reproducibility.html">reproducibility</a> short: R projects evolve over time, as do the packages that they rely on. R projects that do not control package versions will eventually break and/or not be shareable or <a href="https://en.wikipedia.org/wiki/Replication_crisis">reproducible</a><a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
 <p>Since R is a slowly evolving language, it might be reasonable to require that a particular Linux instance have only one version of R installed. However, requiring all R users to use the same versions of all packages to facilitate collaboration is clearly out of the question. The solution is to control package versions at the project level.</p>
+<div class="figure">
+<img src="../../../post/2019-01-05-using-a-fixed-version-of-r-on-linux_files/R-library-loc-access-linux-centos7.PNG" alt="R system, user, and Packrat library locations in Linux CentOS 7" width="700" />
+<p class="caption">R system, user, and Packrat library locations in Linux CentOS 7</p>
+</div>
 </div>
 <div id="packrat-manages-package-dependencies" class="section level2">
 <h2>Packrat manages package dependencies</h2>
@@ -93,7 +97,7 @@
 <li>We then run the install script to set up the instance and archive an image of it for future use.</li>
 <li>Once the fixed-R instance is set up, <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> contains an R-version specific base project with pre-built, Packrat-managed, fixed-versions of many popular data-science packages<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>.</li>
 <li>We <code>git clone</code> <a href="https://github.com/ras44/rstudio-project">rstudio-project</a> to a new project directory locally and remove the existing <code>.git</code> directory so that it can be turned it into a new git repo with <code>git init</code>.</li>
-<li>We open the project in RStudio and begin work. All packages are pre-built, so we don’t have to go through lengthy installs. We can upgrade packages in the <code>Packrat Library</code> of the “Packages” tab, and then run <code>packrat::snapshot()</code> to save any libraries and ugrades into the project’s <code>packrat/</code> directory. We can then <code>git add packrat</code> to add any packrat updates to the project’s git repo.</li>
+<li>We open the project in RStudio and begin work. All packages are pre-built, so we don’t have to go through lengthy installs. We can upgrade packages in the <code>Packrat Library</code> of the “Packages” tab, and then run <code>packrat::snapshot()</code> to save any libraries and ugrades into the project’s <code>packrat/</code> directory. We can then <code>git add packrat</code> to add any Packrat updates to the project’s git repo.</li>
 <li>If we ever need to duplicate results, we can always build the same fixed-R instance (or clone the image we stored earlier), clone the project on the instance, and know that it will work exactly the same as when we previously worked on it… sometimes years earlier.</li>
 </ul>
 <p>Here is a quick example script showing the workflow:</p>
@@ -113,24 +117,31 @@ git init</code></pre>
 <h2>Why we use a fixed version of R</h2>
 <ul>
 <li>We want to ensure reproducibility and make collaboration easier.</li>
-<li>We don’t want to use docker containers<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>.</li>
-<li>We do not want or need to upgrade to the “latest” version of R.</li>
-<li>Packrat ensures our projects always uses the package versions stored with the project.</li>
-<li>Packrat stores packages in R-version-dependent paths.</li>
-<li>Using a fixed version of R ensures projects and packages remain tied to the R version.</li>
+<li>We aren’t able to or don’t want to use docker containers<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>.</li>
+<li>We prefer limited, consistent R-versions over continually upgrading to the “latest” version of R.</li>
 </ul>
 </div>
 <div id="issues-we-have-run-into-with-packrat" class="section level2">
 <h2>Issues we have run into with Packrat</h2>
+<p>Please note, this is not an exhaustive list of issues, nor are these issues likely to arise in every use case. RStudio support has been very helpful in addressing many issues, and may be able to provide input on these too.</p>
+<div class="figure">
+<img src="../../../post/2019-01-05-using-a-fixed-version-of-r-on-linux_files/packrat-project-libs.PNG" alt="Packrat libraries are listed under “Project Library”" width="500" />
+<p class="caption">Packrat libraries are listed under “Project Library”</p>
+</div>
 <ul>
-<li>Occasionally memory-management issues will arise, causing R to crash. We are not sure if this is due to packrat. However if this occurs, the project <strong>must be closed and re-opened</strong>. Attempting to use the project immediately after a crash-restart will not load the packrat libraries.</li>
-<li>We have found <a href="https://github.com/r-dbi/bigrquery/issues/247">some issues</a> appear to arise only when using to packrat. The suggestion is that it is likely a package incompatibility problem due to the packages installed not having updated. This can be challenging to troubleshoot and raises the question of what to do when package versions become incompatible with each other.</li>
-<li>packrat appears to have limited support for installing packages from private/corporate internal repositories. The easiest solution to this is simply to clone the package to a local directory such as “~/local_repos/” (used for install of the package only). Then make use of packrat’s <code>install_local()</code> feature to install from the local directory.</li>
+<li><p>Occasionally memory-management issues will arise, causing R to crash. We are not sure if this is due to Packrat. However if a crash does occur, the project <strong>must be re-opened</strong> in order for the Packrat libraries to be loaded again. Attempting to use the project immediately after a crash-restart will not load the Packrat libraries. Whether or not packages are loaded can be verified by looking at the “packages” tab in RStudio Server and ensuring a “Project Library” header exists with associated Packrat versions included in a Packrat column (see above image).</p></li>
+<li><p>We have found <a href="https://github.com/r-dbi/bigrquery/issues/247">some issues</a> appear to arise only when using to Packrat. The suggestion is that it is likely a package incompatibility problem due to the packages installed not having been updated. This can be challenging to troubleshoot and raises the question of what to do when package versions become incompatible with each other.</p></li>
+<li><p>Packrat appears to have limited support for installing packages from private/corporate internal githubs, though this might have evolved since we last attempted such an install. An easy solution exists: we simply clone the package to a local directory such as <code>~/local_repos/</code> (used for install of the package only). Then we use Packrat’s <code>install_local()</code> feature to install from the <code>local_repos</code> directory. Once it is installed, it is in the Packrat path, and the original source in ’~/local_repos/` can be discarded.</p></li>
 </ul>
 </div>
-<div id="using-a-fixed-version-of-r" class="section level2">
-<h2>Using a fixed version of R</h2>
-<p>While binding a fixed version of R to an instance may seem restrictive, we have found that it is in fact quite liberating. Since we only update the existing R version very infrequently (think once a year max), the barrier of agreeing on an R-version is removed and with it any need to agree on package versions. Instead, packages are distributed with the project via git.</p>
+<div id="benefits-of-using-a-fixed-version-of-r" class="section level2">
+<h2>Benefits of using a fixed version of R</h2>
+<p>While binding a fixed version of R to an instance may seem restrictive, we have found that it is in fact quite liberating. Since we only update the existing R version infrequently (think once a year), the barrier of agreeing on an R-version is removed and with it any need to agree on package versions at the user level. Instead, packages are distributed with the project via git. The benefits of fixing the R version for a particular instance are:</p>
+<ul>
+<li>Sharing Packrat projects and reproducing results are both made easier, since pre-compiled libraries are included with the projects</li>
+<li>Fixing the R-version on an instance doesn’t keep us from upgrading R for a project, as packrat will automatically build and install libraries if an upgraded version is detected. In this way, a project can be opened on an instance with an upgraded R version and have its libraries compiled. Our limited instance image release schedule means the overhead to handle this only occurs at a maximum of once each year.</li>
+<li>It is very unlikely that results will be different across R-versions, however being able to tie project results to one R-version allows us to upgrade R for a project while ensuring that results remain as expected.</li>
+</ul>
 </div>
 <div class="footnotes">
 <hr />
