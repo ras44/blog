@@ -60,15 +60,17 @@ git init
 
 
 ## Issues we have run into with Packrat
-Please note, this is not an exhaustive list of issues, nor are these issues likely to arise in every use case.  RStudio support has been very helpful in addressing many issues, and may be able to provide input on these too.
+Please note, this is a select list of issues that we've run into for which we share our particular experiences and solutions.  RStudio support has been very helpful in addressing issues while monitoring and providing solutions via their [github issue tracker](https://github.com/rstudio/packrat/issues).
 
 ![Packrat libraries are listed under "Project Library"](/post/2019-01-05-using-a-fixed-version-of-r-on-linux_files/packrat-project-libs.PNG){width=500px}
 
-* Occasionally memory-management issues will arise, causing R to crash.  We are not sure if this is due to Packrat.  However if a crash does occur, the project **must be re-opened** in order for the Packrat libraries to be loaded again.  Attempting to use the project immediately after a crash-restart will not load the Packrat libraries.  Whether or not packages are loaded can be verified by looking at the "packages" tab in RStudio Server and ensuring a "Project Library" header exists with associated Packrat versions included in a Packrat column (see above image).
+* If R crashes and the packrat libraries are not accessible after the RStudio restarts the session, the project might need to be re-opened.  Run `.libPaths()` to ensure the project library paths are correct. Verify libraries are accessible by looking at the "packages" tab in RStudio Server and ensuring a "Project Library" header exists with all packages(see above image).  Follow [issue discussion](https://github.com/rstudio/packrat/issues/549).
 
-* We have found [some issues](https://github.com/r-dbi/bigrquery/issues/247) appear to arise only when using to Packrat.  The suggestion is that it is likely a package incompatibility problem due to the packages installed not having been updated.  This can be challenging to troubleshoot and raises the question of what to do when package versions become incompatible with each other.
+* An [issue](https://github.com/r-dbi/bigrquery/issues/247) can arise when some packages are updated but others aren't.  This can be challenging to troubleshoot and raises the question of what to do when package versions become incompatible with each other.  This is not packrat, but version compatibility.
 
-* Packrat appears to have limited support for installing packages from private/corporate internal githubs, though this might have evolved since we last attempted such an install.  An easy solution exists: we simply clone the package to a local directory such as `~/local_repos/` (used for install of the package only).  Then we use Packrat's `install_local()` feature to install from the `local_repos` directory.  Once it is installed, it is in the Packrat path, and the original source in '~/local_repos/` can be discarded.
+* Installing packages directly from private/internal githubs is evolving.  An easy solution exists: simply clone the package to a local directory such as `~/local_repos/`.  Then use `install_local()` to install from the `local_repos` directory.  See [issue](https://github.com/rstudio/packrat/issues/447) for details.
+
+* Packrat can occasionally have [very slow snapshots](https://github.com/rstudio/packrat/issues/347), particularly with projects that contains many R-Markdown files and packages.  This is likely due to packrat dependency searches.  As discussed in the issue, we resolve it by ignoring all of our source directories with `packrat::set_opts(ignored.directories=c("all","my","R","src","directories")` and then running `packrat::snapshot(ignore.stale=TRUE, infer.dependencies=FALSE)`.
 
 ## Benefits of using a fixed version of R
 While binding a fixed version of R to an instance may seem restrictive, we have found that it is in fact quite liberating.  Since we only update the existing R version infrequently (think once a year), the barrier of agreeing on an R-version is removed and with it any need to agree on package versions at the user level.  Instead, packages are distributed with the project via git.  The benefits of fixing the R version for a particular instance are:
