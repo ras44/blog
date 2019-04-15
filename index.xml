@@ -47,13 +47,14 @@ Figure: Providing credentials via an interactive prompt
     </item>
     
     <item>
-      <title>Using a Fixed Version of R on Linux</title>
+      <title>Setting up RStudio Server on a cloud with Linux.</title>
       <link>/2019/01/05/using-a-fixed-version-of-r-on-linux.html</link>
       <pubDate>Sat, 05 Jan 2019 00:00:00 +0000</pubDate>
       
       <guid>/2019/01/05/using-a-fixed-version-of-r-on-linux.html</guid>
       <description>edit
- The below article refers to setting up R and RStudio Server on a cloud Linux instance in a way that ensures R project reproducibility and facilitates collaboration. Many possible workflows exist to accomplish this. One might call the below presentation an “opinionated” solution based on what we have found to work in a production environment. Importantly, all development is on an RStudio Server cloud Linux instance, ensuring that we only have to support one operating system.</description>
+Roland Stevenson is a data scientist and consultant who may be reached on Linkedin.
+When setting up R and RStudio Server on a cloud Linux instance, some thought should be given to implementing a workflow that facilitates collaboration and ensures R project reproducibility. There are many possible workflows to accomplish this. In this post we offer an “opinionated” solution based on what we have found to work in a production environment.</description>
     </item>
     
     <item>
