@@ -18,7 +18,7 @@
       
       <guid>/2019/04/08/validating-type-i-and-ii-errors-in-a-b-tests-in-r.html</guid>
       <description>edit
-In the below work, we will intentionally leave out statistics theory and attempt to develop an intuitive sense of what type I and type II errors represent when running A/B tests.
+In the below work, we will intentionally leave out statistics theory and attempt to develop an intuitive sense of what type I(false-positive) and type II(false-negative) errors represent when comparing metrics in A/B tests.
 One of the problems plaguing the analysis of A/B tests today is known as the “peeking problem”. To better understand what “peeking” is, it helps to first understand how to properly run a test. We will focus on the case of testing whether there is a difference between the conversion rates cr_a and cr_b for groups A and B.</description>
     </item>
     
