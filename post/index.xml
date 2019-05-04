@@ -18,7 +18,7 @@
       
       <guid>/2019/05/04/reticulate-virtualenv-and-python-in-linux-demo.html</guid>
       <description>edit
-Motivation RStudio-Server 1.2 Preview has advanced reticulate support, which allows us to use packages developed in Python from within RStudio. I recently found this functionality useful while trying to compare the results of different uplift models. Though I did have R’s uplift package producing Qini charts and metrics, I also wanted to see how things looked with Waylift’s promising pylift package. Since pylift is only available in python, reticulate made it easy for me to quickly use pylift from within RStudio.</description>
+Motivation reticulate is an R-package that allows us to use Python modules from within RStudio. I recently found this functionality useful while trying to compare the results of different uplift models. Though I did have R’s uplift package producing Qini charts and metrics, I also wanted to see how things looked with Waylift’s promising pylift package. Since pylift is only available in python, reticulate made it easy for me to quickly use pylift from within RStudio.</description>
     </item>
     
     <item>
