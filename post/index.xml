@@ -6,10 +6,20 @@
     <description>Recent content in Posts on Roland&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 08 Apr 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 04 May 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Reticulate, virtualenv, and Python in linux</title>
+      <link>/2019/05/04/reticulate-virtualenv-and-python-in-linux-demo.html</link>
+      <pubDate>Sat, 04 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/05/04/reticulate-virtualenv-and-python-in-linux-demo.html</guid>
+      <description>edit
+Motivation RStudio-Server 1.2 Preview has advanced reticulate support, which allows us to use packages developed in Python from within RStudio. I recently found this functionality useful while trying to compare the results of different uplift models. Though I did have R’s uplift package producing Qini charts and metrics, I also wanted to see how things looked with Waylift’s promising pylift package. Since pylift is only available in python, reticulate made it easy for me to quickly use pylift from within RStudio.</description>
+    </item>
     
     <item>
       <title>Validating Type I and II Errors in A/B Tests in R</title>
