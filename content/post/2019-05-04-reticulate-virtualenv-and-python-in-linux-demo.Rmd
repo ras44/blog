@@ -14,6 +14,7 @@ tags: []
 [reticulate](https://rstudio.github.io/reticulate/) is an R-package that allows us to use Python modules from within RStudio.  I recently found this functionality useful while trying to compare the results of different uplift models.  Though I did have R's `uplift` package producing Qini charts and metrics, I also wanted to see how things looked with Waylift's promising [pylift package](https://github.com/wayfair/pylift).  Since pylift is only available in python, reticulate made it easy for me to quickly use pylift from within RStudio.
 
 In the article below, I'll show how I worked through the following circumstances:
+
 - Since pylift has only been tested on Python >= 3.6, and my system version of Python was 2.7, I needed to build and install Python 3.6 for myself, preferrably within a self-contained virtual environment
 - I wanted to install pylift in the virtual environment and set up reticulate in my R Project to work within that environment
 - Finally, I needed to access pylift from an R Markdown document via the reticulate interface
