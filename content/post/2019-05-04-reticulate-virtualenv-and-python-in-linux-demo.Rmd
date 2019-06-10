@@ -11,7 +11,7 @@ tags: []
 [edit](https://github.com/ras44/blog/edit/master/content/post/2019-05-04-reticulate-virtualenv-and-python-in-linux-demo.Rmd)
 
 # Motivation
-[reticulate](https://rstudio.github.io/reticulate/) is an R-package that allows us to use Python modules from within RStudio.  I recently found this functionality useful while trying to compare the results of different uplift models.  Though I did have R's `uplift` package producing Qini charts and metrics, I also wanted to see how things looked with Waylift's promising [pylift package](https://github.com/wayfair/pylift).  Since pylift is only available in python, reticulate made it easy for me to quickly use pylift from within RStudio.
+[reticulate](https://rstudio.github.io/reticulate/) is an R-package that allows us to use Python modules from within RStudio.  I recently found this functionality useful while trying to compare the results of different uplift models.  Though I did have R's `uplift` package producing Qini charts and metrics, I also wanted to see how things looked with Wayfair's promising [pylift package](https://github.com/wayfair/pylift).  Since pylift is only available in python, reticulate made it easy for me to quickly use pylift from within RStudio.
 
 In the article below, I'll show how I worked through the following circumstances:
 
@@ -50,6 +50,9 @@ cd
 wget https://s3.amazonaws.com/rstudio-ide-build/server/centos6/x86_64/rstudio-server-rhel-1.2.1335-x86_64.rpm
 sudo yum install -y --nogpgcheck rstudio-server-rhel-1.2.1335-x86_64.rpm
 sudo rstudio-server start
+# if no user account with password exists yet
+sudo useradd example
+sudo passwd example
 ```
 
 Some notes:
@@ -59,6 +62,7 @@ Some notes:
 - we use virtualenv to create a virtual environment called "pylift" and then ensure that all Python packages are installed to that environment only (so as not to pollute any other environments we are working with)
 - we then clone the pylift source and install pylift along with all of its requirements via `pip install -r requirements.txt`
 - finally, we install the RStudio Server 1.2 Preview version in order to leverage its advanced reticulate features
+- ensure you have created a user with a password to log into RStudio Server
 
 
 # Using Python from within RStudio via reticulate
