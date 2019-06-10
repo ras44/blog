@@ -74,7 +74,7 @@
 <p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-05-04-reticulate-virtualenv-and-python-in-linux-demo.Rmd">edit</a></p>
 <div id="motivation" class="section level1">
 <h1>Motivation</h1>
-<p><a href="https://rstudio.github.io/reticulate/">reticulate</a> is an R-package that allows us to use Python modules from within RStudio. I recently found this functionality useful while trying to compare the results of different uplift models. Though I did have R’s <code>uplift</code> package producing Qini charts and metrics, I also wanted to see how things looked with Waylift’s promising <a href="https://github.com/wayfair/pylift">pylift package</a>. Since pylift is only available in python, reticulate made it easy for me to quickly use pylift from within RStudio.</p>
+<p><a href="https://rstudio.github.io/reticulate/">reticulate</a> is an R-package that allows us to use Python modules from within RStudio. I recently found this functionality useful while trying to compare the results of different uplift models. Though I did have R’s <code>uplift</code> package producing Qini charts and metrics, I also wanted to see how things looked with Wayfair’s promising <a href="https://github.com/wayfair/pylift">pylift package</a>. Since pylift is only available in python, reticulate made it easy for me to quickly use pylift from within RStudio.</p>
 <p>In the article below, I’ll show how I worked through the following circumstances:</p>
 <ul>
 <li>Since pylift has only been tested on Python &gt;= 3.6, and my system version of Python was 2.7, I needed to build and install Python 3.6 for myself, preferrably within a self-contained virtual environment</li>
@@ -108,7 +108,10 @@ pip install -r requirements.txt
 cd
 wget https://s3.amazonaws.com/rstudio-ide-build/server/centos6/x86_64/rstudio-server-rhel-1.2.1335-x86_64.rpm
 sudo yum install -y --nogpgcheck rstudio-server-rhel-1.2.1335-x86_64.rpm
-sudo rstudio-server start</code></pre>
+sudo rstudio-server start
+# if no user account with password exists yet
+sudo useradd example
+sudo passwd example</code></pre>
 <p>Some notes:</p>
 <ul>
 <li>the <code>--enable-shared</code> option is <a href="https://github.com/rstudio/reticulate/issues/138">required</a> when building Python in order for reticulate to work</li>
@@ -116,6 +119,7 @@ sudo rstudio-server start</code></pre>
 <li>we use virtualenv to create a virtual environment called “pylift” and then ensure that all Python packages are installed to that environment only (so as not to pollute any other environments we are working with)</li>
 <li>we then clone the pylift source and install pylift along with all of its requirements via <code>pip install -r requirements.txt</code></li>
 <li>finally, we install the RStudio Server 1.2 Preview version in order to leverage its advanced reticulate features</li>
+<li>ensure you have created a user with a password to log into RStudio Server</li>
 </ul>
 </div>
 <div id="using-python-from-within-rstudio-via-reticulate" class="section level1">
