@@ -115,5 +115,5 @@ The above Python chunk uses reticulate from within RStudio to interact with pyli
 - want to use a different Python version than they typically use while not affecting their typical setup by way of a virtual environment
 - want to install a Python module like pylift within a virtual environment so as not to affect any of their user- or system-level Python module installations
 - want to use reticulate from RStudio to access a custom virtual environment, Python version, and Python modules
-- wants to be able to delete the virtual environment and R-Project and have everything go back to the way it was
-- wants to be able to reproduce or share the environment exactly so that the workflow can be shared with others
+- want to be able to delete the virtual environment and R-Project and have everything go back to the way it was
+- want to be able to reproduce or share the environment exactly so that the workflow can be shared with others
