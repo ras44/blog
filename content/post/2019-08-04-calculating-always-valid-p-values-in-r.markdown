@@ -101,14 +101,7 @@ ptpt <- pwr.2p.test(h = ES.h(p1 = cr_a, p2 = (1+mde)*cr_a),
                     power = power
 )
 n_obs <- ceiling(ptpt$n)
-n_obs
-```
 
-```
-## [1] 4860
-```
-
-```r
 # make our "true" effect 1.5x larger than the mde
 # this should yield a conclusive test result
 effect <- 1.5*mde
@@ -184,6 +177,7 @@ ggplot(tt, aes(x=seq_along(p.value), y=1-p.value)) +
 ```
 
 <img src="/post/2019-08-04-calculating-always-valid-p-values-in-r_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+
 In this case, we see a test in which the p-values oscillate near alpha.  A "peeker" looking at this might have incorrectly called it a winner early on, however our always-valid p-values maintain the correct outcome.
 
 Now set things up to have an effect 1.5 times the size of the minimum detectable effect and see what effect varying `\(\tau^2\)` has.  We'll choose 5 different values at different orders of magnitude between 0.0001 and 1:
@@ -255,6 +249,6 @@ ggplot(tt, aes(x=seq_along(p.value), y=1-p.value)) +
 
 <img src="/post/2019-08-04-calculating-always-valid-p-values-in-r_files/figure-html/unnamed-chunk-4-1.png" width="672" />
 
-It looks like we can stop early if we use anything by the lowest and highest values for `\(\tau^2\)`.  An interesting question to ponder: could we calculate always-valid p-values for a range of `\(\tau^2\)` and then take the first one that crosses the line?
+It looks like we might be able to stop early if we use anything by the lowest and highest values for `\(\tau^2\)`.
 
 Using always-valid p-values, particularly for small or zero-sized effects, can be helpful in avoiding false positives.  I've glossed over some important details that should be considered when working with non-normal data, but I hope this provides an introduction to an alternative way of evaluating binomial A/B tests.  See [Always Valid Inference: Continuous Monitoring of A/B Tests](https://arxiv.org/pdf/1512.04922.pdf) for more details.
