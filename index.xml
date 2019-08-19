@@ -6,10 +6,20 @@
     <description>Recent content on Roland&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 04 May 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 04 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Calculating Always-valid p-values in R</title>
+      <link>/2019/08/04/calculating-always-valid-p-values-in-r.html</link>
+      <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/08/04/calculating-always-valid-p-values-in-r.html</guid>
+      <description>edit
+In a previous post we developed a framework for understanding Type-I and Type-II errors in A/B tests. We learned how to properly calculate the number of observations per group for the test to have a particular false-positive-rate and false-negative rate. We also learned that the correct time to measure the results of such a test is when exactly the calculated number of observations have been made: one time per experiment.</description>
+    </item>
     
     <item>
       <title>Reticulate, virtualenv, and Python in linux</title>
