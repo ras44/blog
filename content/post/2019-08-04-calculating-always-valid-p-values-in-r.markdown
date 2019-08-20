@@ -8,7 +8,7 @@ tags: []
 ---
 
 
-[edit](https://github.com/ras44/blog/edit/master/content/post/2019-08-04-calculating-always-valid-p-values-in-r.Rmd)
+[edit](https://github.com/ras44/blog/edit/master/content/post/2019-08-04-calculating-always-valid-p-values-in-r.Rmarkdown)
 
 In a [previous post](https://ras44.github.io/blog/2019/04/08/validating-type-i-and-ii-errors-in-a-b-tests-in-r.html) we developed a framework for understanding Type-I and Type-II errors in A/B tests.  We learned how to properly calculate the number of observations per group for the test to have a particular false-positive-rate and false-negative rate.  We also learned that the correct time to measure the results of such a test is when exactly the calculated number of observations have been made: one time per experiment.  Finally, we learned that a common problem plaguing A/B tests is **peeking**.
 
@@ -19,7 +19,7 @@ In this post, we will develop a framework for always-valid inference based on th
 
 [^1]: For an even simpler approach, see what [Etsy does](https://codeascraft.com/2018/10/03/how-etsy-handles-peeking-in-a-b-testing/).
 
-In section 5 of the paper the authors propose their method for calculating always-valid p-values: the minimal sequential ratio probability test (mSPRT), first introduced by Robbins (1970).  To keep this post brief, we will not do the paper's theoretical foundations justice.  Instead we will focus on the most important equations, which we will use to produce always valid p-values in our R-code.  For those uninterested in the math, feel free to skip ahead.
+In section 5 of the paper the authors propose their method for calculating always-valid p-values: the mixture sequential ratio probability test (mSPRT), first introduced by Robbins (1970).  To keep this post brief, we will not do the paper's theoretical foundations justice.  Instead we will focus on the most important equations, which we will use to produce always valid p-values in our R-code.  For those uninterested in the math, feel free to skip ahead.
 
 The paper makes some basic assumptions on the data and its functional form: it is real valued and drawn from a single-parameter exponential family where tests are of the parameter `\(\theta\)`.  The mSPRT is parametrized by a mixing distribution `\(H\)` over `\(\Theta\)`, an open interval that contains all `\(\theta\)`.  Given an observed sample average `\(s_n\)` at time `\(n\)`, the mixture likelihood ratio of `\(\theta\)` against `\(\theta_0\)` with respect to H is defined as:
 
