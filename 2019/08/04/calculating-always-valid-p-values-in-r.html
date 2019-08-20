@@ -68,7 +68,7 @@
     
 
     <div class="article-content">
-      <p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-08-04-calculating-always-valid-p-values-in-r.Rmd">edit</a></p>
+      <p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-08-04-calculating-always-valid-p-values-in-r.Rmarkdown">edit</a></p>
 
 <p>In a <a href="https://ras44.github.io/blog/2019/04/08/validating-type-i-and-ii-errors-in-a-b-tests-in-r.html">previous post</a> we developed a framework for understanding Type-I and Type-II errors in A/B tests.  We learned how to properly calculate the number of observations per group for the test to have a particular false-positive-rate and false-negative rate.  We also learned that the correct time to measure the results of such a test is when exactly the calculated number of observations have been made: one time per experiment.  Finally, we learned that a common problem plaguing A/B tests is <strong>peeking</strong>.</p>
 
@@ -80,7 +80,7 @@
 
 <p>In this post, we will develop a framework for always-valid inference based on the paper <a href="https://arxiv.org/pdf/1512.04922.pdf">Always Valid Inference: Continuous Monitoring of A/B Tests</a> (2019 Johari, Pekelis, Walsh).  Using an always-valid p-value allows us to continuously monitor A/B tests and potentially stop the test early in a valid way<sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup>.</p>
 
-<p>In section 5 of the paper the authors propose their method for calculating always-valid p-values: the minimal sequential ratio probability test (mSPRT), first introduced by Robbins (1970).  To keep this post brief, we will not do the paper&rsquo;s theoretical foundations justice.  Instead we will focus on the most important equations, which we will use to produce always valid p-values in our R-code.  For those uninterested in the math, feel free to skip ahead.</p>
+<p>In section 5 of the paper the authors propose their method for calculating always-valid p-values: the mixture sequential ratio probability test (mSPRT), first introduced by Robbins (1970).  To keep this post brief, we will not do the paper&rsquo;s theoretical foundations justice.  Instead we will focus on the most important equations, which we will use to produce always valid p-values in our R-code.  For those uninterested in the math, feel free to skip ahead.</p>
 
 <p>The paper makes some basic assumptions on the data and its functional form: it is real valued and drawn from a single-parameter exponential family where tests are of the parameter <code>\(\theta\)</code>.  The mSPRT is parametrized by a mixing distribution <code>\(H\)</code> over <code>\(\Theta\)</code>, an open interval that contains all <code>\(\theta\)</code>.  Given an observed sample average <code>\(s_n\)</code> at time <code>\(n\)</code>, the mixture likelihood ratio of <code>\(\theta\)</code> against <code>\(\theta_0\)</code> with respect to H is defined as:</p>
 
