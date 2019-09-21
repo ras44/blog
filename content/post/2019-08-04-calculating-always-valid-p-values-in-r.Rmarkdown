@@ -85,7 +85,7 @@ calc_avpvs <- function(n_obs, cr_a_obs, cr_b_obs, tau_sq = 0.1){
 
 Now, let's create a test example, similar to our previous post, and set an effect size that is twice the minimum detectable effect.  In this case, we should expect that after having observed the "correct" number of observations given by the power calculation, there is a very high probability that we'll see an effect.
 
-```{r}
+```{r warning=FALSE}
 library(pwr)
 library(ggplot2)
 set.seed(5)
@@ -117,7 +117,8 @@ avpvs <- calc_avpvs(observations, conversions_a, conversions_b)
 
 # And we'll calculate "regular" p-values as well
 tt <- sapply(10:observations, function(x){
-  t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 
 tt <- data.frame(p.value = unlist(tt))
@@ -141,7 +142,7 @@ ggplot(tt, aes(x=seq_along(p.value), y=1-p.value)) +
 
 In this case, we see that by using the always valid p-value we would be able to terminate early while still controlling the false positive rate at $\alpha$.  Let's look at what happens when there is no effect:
 
-```{r}
+```{r warning=FALSE}
 effect <- 0
 cr_b <- (1+effect)*cr_a
 observations <- 2*n_obs
@@ -155,7 +156,8 @@ avpvs <- calc_avpvs(observations, conversions_a, conversions_b)
 
 # And we'll calculate "regular" p-values as well
 tt <- sapply(10:observations, function(x){
-  t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 tt <- data.frame(p.value = unlist(tt))
 
@@ -178,7 +180,7 @@ ggplot(tt, aes(x=seq_along(p.value), y=1-p.value)) +
 In this case, we see a test in which the p-values oscillate near alpha.  A "peeker" looking at this might have incorrectly called it a winner early on, however our always-valid p-values maintain the correct outcome.
 
 Now set things up to have an effect 1.5 times the size of the minimum detectable effect and see what effect varying $\tau^2$ has.  We'll choose 5 different values at different orders of magnitude between 0.0001 and 1:
-```{r}
+```{r warning=FALSE}
 library(pwr)
 library(ggplot2)
 set.seed(5)
@@ -193,7 +195,6 @@ ptpt <- pwr.2p.test(h = ES.h(p1 = cr_a, p2 = (1+mde)*cr_a),
                     power = power
 )
 n_obs <- ceiling(ptpt$n)
-n_obs
 
 
 # make our "true" effect 1.5x larger than the mde
@@ -215,7 +216,8 @@ avpvs_tse <- calc_avpvs(observations, conversions_a, conversions_b, tau_sq = 1)
 
 # And we'll calculate "regular" p-values as well
 tt <- sapply(10:observations, function(x){
-  t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 tt <- data.frame(p.value = unlist(tt))
 

@@ -118,7 +118,8 @@ avpvs <- calc_avpvs(observations, conversions_a, conversions_b)
 
 # And we'll calculate "regular" p-values as well
 tt <- sapply(10:observations, function(x){
-  t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 
 tt <- data.frame(p.value = unlist(tt))
@@ -157,7 +158,8 @@ avpvs <- calc_avpvs(observations, conversions_a, conversions_b)
 
 # And we'll calculate "regular" p-values as well
 tt <- sapply(10:observations, function(x){
-  t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 tt <- data.frame(p.value = unlist(tt))
 
@@ -197,14 +199,8 @@ ptpt <- pwr.2p.test(h = ES.h(p1 = cr_a, p2 = (1+mde)*cr_a),
                     power = power
 )
 n_obs <- ceiling(ptpt$n)
-n_obs
-```
 
-```
-## [1] 4860
-```
 
-```r
 # make our "true" effect 1.5x larger than the mde
 # this should yield a conclusive test result
 effect <- 1.5*mde
@@ -224,7 +220,8 @@ avpvs_tse <- calc_avpvs(observations, conversions_a, conversions_b, tau_sq = 1)
 
 # And we'll calculate "regular" p-values as well
 tt <- sapply(10:observations, function(x){
-  t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 tt <- data.frame(p.value = unlist(tt))
 

@@ -1,0 +1,283 @@
+---
+title: Multiple Hypothesis Testing in R
+author: ''
+date: '2019-09-20'
+slug: multiple-hypothesis-testing-in-r
+categories: []
+tags: []
+---
+
+In the first article of this series we looked at understanding type I and type II errors in the context of an A/B test and highlighted the issue of "peeking" in A/B tests.  In the second, we illustrated a way to calculate always-valid p-values that were immune to "peeking".  We will now explore what happens when multiple tests are conducted at the same time, or multiple hypothesis testing.
+
+We will set things up as before, with the false positive rate $\alpha = 0.05$ and false negative rate $\beta=0.20$.
+
+```{r}
+library(pwr)
+library(ggplot2)
+set.seed(1)
+
+mde <- 0.1  # minimum detectable effect
+cr_a <- 0.25 # the expected conversion rate for group A
+alpha <- 0.05 # the false positive rate
+power <- 0.80 # 1-false negative rate
+
+ptpt <- pwr.2p.test(h = ES.h(p1 = cr_a, p2 = (1+mde)*cr_a), 
+           sig.level = alpha, 
+           power = power
+           )
+n_obs <- ceiling(ptpt$n)
+
+
+
+```
+
+To illustrate concepts in this article, we are going to use the same monte-carlo utility function that we used previously:
+```{r}
+#
+# monte carlo runs n_simulations and calls the callback function each time with the ... optional args
+#
+monte_carlo <- function(n_simulations, callback, ...){
+  simulations <- 1:n_simulations
+
+  sapply(1:n_simulations, function(x){
+    callback(...)
+  })
+}
+```
+
+As a refresher, we'll use the `monte_carlo` utility function to run 1000 experiments, measuring whether the p.value is less than alpha **after `n_obs` observations**.  If it is, we reject the null hypothesis.  We will set the effect size to 0: we know that there is no effect and that the null hypothesis is globally true.  In this case, we expect about 50 rejections and about 950 non-rejections, since 50/1000 would represent our expected maximum 5% false positive rate.
+
+```{r warning=FALSE}
+set.seed(1)
+
+# make our "true" effect zero: the null hypothesis is always true
+effect <- 0
+cr_b <- (1+effect)*cr_a
+observations <- 2*n_obs
+
+reject_at_i <- function(observations, i){
+  conversions_a <- rbinom(observations, 1, cr_a)
+  conversions_b <- rbinom(observations, 1, cr_b)
+  ( prop.test(c(sum(conversions_a[1:i]),sum(conversions_b[1:i])), c(i,i))$p.value ) < alpha
+}
+
+# run the sim
+rejected.H0 <- monte_carlo(1000, 
+                           callback=reject_at_i,
+                           observations=n_obs,
+                           i=n_obs
+                           )
+
+# output the rejection table
+table(rejected.H0)
+
+```
+
+In practice, we don't usually test the same thing 1000 times.  We test it once and state that there is a maximum 5% chance that we have falsely said there was an effect when there wasn't one[^1].
+
+[^1]: And maximum 20% chance that we said there wasn't an effect when there was one.
+
+
+## The Family-Wise Error Rate (FWER)
+Now, imagine we test two separate conversion rates (login and purchase, for example) using the same source data and let each test have the same $\alpha$ and $\beta$ as before.  What is the probability that we will detect *at least one* false positive considering the results of both tests?  This is known as the family-wise error rate (FWER) and would apply to the case where a researcher claims all tests have an effect if any of them yields a positive result.  It's clear that this could be an issue, as the [family-wise error rate](https://en.wikipedia.org/wiki/Family-wise_error_rate) wikipedia page illustrates:
+
+>> Suppose the treatment is a new way of teaching writing to students, and the control is the standard way of teaching writing. Students in the two groups can be compared in terms of grammar, spelling, organization, content, and so on. As more attributes are compared, it becomes increasingly likely that the treatment and control groups will appear to differ on at least one attribute due to random sampling error alone.
+
+
+To calculate the probability that *at least one* false positive will arise in our two-test example, consider that:
+
+- the probability that one test will reject the null is $\alpha$
+- the probability that it will not reject the null is $1-\alpha$
+
+Thus, the probability that both tests will not reject the null is $(1-\alpha)^2)$ and the probability that *at least one* test will reject the null is $1-(1-\alpha)^2$.  For $m$ tests, this generalizes to $1-(1-\alpha)^m$.  With $\alpha=0.05$ and $m=2$, we have:
+
+```{r}
+m<-2
+1-(1-alpha)^m
+```
+
+Let's see if we produce the same result with a monte carlo simulation.  We will run the monte carlo for `n_trials` and run `n_tests_per_trial`.  For each trial, if *at least one* of the `n_tests_per_trial` results in a rejection of the null, we consider that the trial rejects the null.  We should see that about 1 in 10 trials reject the null.  For what is to come next, we will look at this calculation slightly differently: instead of calculating rejection proportions based on the number of trials, we will calculate the proportion of rejected hypotheses relative to the total number of hypothesis test.  For this to work, we will need to create a rule, which we'll call the "naive method" that says: "if we reject at least one hypothesis in a trial, then we reject all of them".  This is implemeted below:
+
+```{r}
+set.seed(1)
+n_tests_per_trial <- 2
+n_trials <- 1000
+rejects <- 0
+
+for(i in 1:n_trials){
+  # run the sim
+  rejected.H0 <- monte_carlo(n_tests_per_trial,
+                             callback=reject_at_i,
+                             observations=n_obs,
+                             i=n_obs
+                             )
+  if(!is.na(table(rejected.H0)[2])) {
+    rejects <- rejects + n_tests_per_trial
+  }
+}
+
+rejects/(n_trials * n_tests_per_trial)
+```
+
+Both results show that two tests on the same family of data will lead to a ~10% chance that a researcher will claim a "significant" result if they look for either test to yield a positive result.  Any claim there is a maximum 5% false positive rate would be mistaken.  As an exercise, test that doing the same on 4 tests will lead to an ~18% chance!  A bad testing platform would be one that claims 5% significance when any one of multiple tests on the same family of data show significance at the 5% level.  Clearly, if a researcher is going to claim that one positive result of $m$ tests is significant at the level $\alpha$, then the family-wise error rate must be controlled, taking into account that $m$ tests have been run.
+
+There are many ways to control for the FWER, and the most conservative is the [Bonferroni correction](https://en.wikipedia.org/wiki/Bonferroni_correction).  As opposed to the "naive method", the "Bonferroni method" will reject the null hypothesis if $p_i \le \frac{\alpha}{m}$.  We will swtich our `reject_at_i` function for a `p_value_at_i` function, and then add in the Bonferroni correction:
+
+```{r}
+set.seed(1)
+
+p_value_at_i <- function(observations, i){
+  conversions_a <- rbinom(observations, 1, cr_a)
+  conversions_b <- rbinom(observations, 1, cr_b)
+
+  prop.test(c(sum(conversions_a[1:i]),sum(conversions_b[1:i])), c(i,i))$p.value
+}
+
+n_tests_per_trial <- 2
+n_trials <- 1000
+rejects <- 0
+
+for(i in 1:n_trials){
+  # run n_tests_per_trial
+  p_values <- monte_carlo(n_tests_per_trial,
+                             callback=p_value_at_i,
+                             observations=n_obs,
+                             i=n_obs
+                             )
+  # Bonferroni-adjust the p-values and reject any cases with p-values <= alpha
+  rejects <- rejects + sum(p_values*n_tests_per_trial <= alpha)
+
+}
+
+rejects/(n_trials * n_tests_per_trial)
+```
+
+With the Bonferroni correction, we see that the realized false positive rate is below the 5% level.
+
+Up until now, we have only shown that the Bonferroni correction controls the FWER for the case that all null hypotheses are actually true: the effect is set to zero.  This is called controlling in the *weak sense*.  However, the Bonferroni correction actually guarantees that the FWER is controlled in the *strong sense*, in which we have any configuration of true and non-true null hypothesis.  This is ideal, because in reality we do not know if there is an effect or not.
+
+Other corrections exist that control in the strong sense.  Before we illustrate the control in the strong sense, we will use using R's `p.adjust` function to illustrate the Bonferroni and [Holm](https://en.wikipedia.org/wiki/Holm%E2%80%93Bonferroni_method) adjustments to the p-values, still in the case where we have no effect:
+
+
+```{r, warning=FALSE}
+set.seed(1)
+
+n_tests_per_trial <- 2
+n_trials <- 1000
+
+res_bf <- c()
+res_holm <- c()
+
+for(i in 1:n_trials){
+
+  # run n_tests_per_trial
+  p_values <- monte_carlo(n_tests_per_trial,
+                          callback=p_value_at_i,
+                          observations=n_obs,
+                          i=n_obs
+                          )
+  # Bonferroni: adjust the p-values and reject/accept
+  bf_reject <- p.adjust(p_values, "bonferroni") <= alpha
+  for(r in bf_reject){
+    res_bf <- c(res_bf, r)
+  }
+
+  # Holm: adjust the p-values and reject/accept
+  holm_reject <- p.adjust(sort(p_values), "holm") <= alpha
+  for(r in holm_reject){
+    res_holm <- c(res_holm, r)
+  }
+  
+}
+
+sum(res_bf)/length(res_bf)
+sum(res_holm)/length(res_holm)
+
+```
+
+
+
+We see that the Holm correction is very similar to the Bonferroni correction in the case that the null hypothesis is always true.  However, the Holm correction is uniformly more powerful than the Bonferroni correction.  This means that in the case that there *is* an effect, and the null is false, using the Holm correction will have higher power and be more likely to detect the effect.
+
+Let's test that using our simulations by setting the effect size to the minimum detectable effect in about half the cases.  Note the slightly modified `p_value_at_i` function as well as the `null_true` variable which will randomly decide if there is a minimum detectable effect size or not for that particular trial.
+
+```{r, warning=FALSE}
+set.seed(1)
+
+p_value_at_i <- function(observations, i, cr_a, cr_b){
+  conversions_a <- rbinom(observations, 1, cr_a)
+  conversions_b <- rbinom(observations, 1, cr_b)
+
+  prop.test(c(sum(conversions_a[1:i]),sum(conversions_b[1:i])), c(i,i))$p.value
+}
+
+n_tests_per_trial <- 2
+n_trials <- 1000
+
+res_bf <- c()
+res_holm <- c()
+
+for(i in 1:n_trials){
+  null_true <- rbinom(1,1,prob = 0.5)
+  effect <- mde * null_true
+  cr_b <- (1+effect)*cr_a
+
+  # run n_tests_per_trial
+  p_values <- monte_carlo(n_tests_per_trial,
+                          callback=p_value_at_i,
+                          observations=n_obs,
+                          i=n_obs,
+                          cr_a=cr_a,
+                          cr_b=cr_b
+                          )
+  # Bonferroni: adjust the p-values and reject/accept
+  reject_bf <- p.adjust(p_values, "bonferroni") <= alpha
+  for(r in reject_bf){
+    res_bf <- rbind(res_bf, c(r, null_true))
+  }
+
+  # Holm: adjust the p-values and reject/accept
+  reject_holm <- p.adjust(sort(p_values), "holm") <= alpha
+  for(r in reject_holm){
+    res_holm <- rbind(res_holm, c(r, null_true))
+  }
+  
+}
+
+# the rows of the table represent the test result
+# while the columns represent the null truth
+table_bf <- table(Test=res_bf[,1], Null=res_bf[,2])
+table_holm <- table(Test=res_holm[,1], Null=res_holm[,2])
+
+# False positive rate
+fpr_bf <- table_bf['1','0']/sum(table_bf[,'0'])
+fpr_holm <- table_holm['1','0']/sum(table_holm[,'0'])
+
+print(paste0("FPR Bonferroni: ", round(fpr_bf,3), " FPR Holm: ", round(fpr_holm,3)))
+
+# Power
+power_bf <- table_bf['1','1']/sum(table_bf[,'1'])
+power_holm <- table_holm['1','1']/sum(table_holm[,'1'])
+
+print(paste0("Power Bonferroni: ", round(power_bf,3), " Power Holm: ", round(power_holm,3)))
+
+# Comparing the Power of Holm vs. Bonferroni
+print(paste0("Power Holm/Power Bonferroni: ", round(power_holm/power_bf,3)))
+```
+
+Indeed, we observe that the while the realized false positive rates of both the Bonferroni and Holm methods are very similar, the Holm method has greater power.  These corrections essentially reduce our $\alpha$ threshold so that across the family of tests we produce false positives with a probability of no more than $\alpha$, however this comes at the expense of a reduction in power.
+
+We have illustrated three methods for deciding what null hypotheses in a family of tests to reject.  The "naive method" rejects all if at least one is rejected at the $\alpha$ level.  The "Bonferroni method" rejects hypotheses at the $\alpha/m$ level.  And the "Holm method" has a more involved algorithm for which hypotheses to reject.  The Bonferroni and Holm methods have the property that they control the FWER, the probability of detecting false positives across the family of tests, at $\alpha$.
+
+This raises an interesting question: What if we are not concerned about controlling the probability of detecting false positives, but something else?  We might be more interested in controlling the expected proportion of false discoveries amongst the rejected hypotheses, the false discovery rate.  As a quick preview, let's calculate the false discovery rate for our two cases:
+
+```{r}
+table_holm
+table_bf
+fdr_holm <- table_holm['1','0']/sum(table_holm['1',])
+fdr_holm
+fdr_bf <- table_bf['1','0']/sum(table_bf['1',])
+fdr_bf
+```
+
+We note that the Bonferroni and Holm methods produce different false discovery rates, and we previously noted that Holm was uniformly more powerful than Bonferroni.  Perhaps, if we control for false discovery rates instead of false positive rates, we will be able to produce more powerful results.  We will look at the false discovery rate and other measures in a future article.

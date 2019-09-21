@@ -40,11 +40,11 @@ Given the parameters we included in our power calculation, there are two things 
 ## Illustrating alpha and beta parameters
 Let's try to illustrate this through a simulation.  We'll simulate two sequences of conversions with conversion rates such that `cr_b = (1+mde)*cr_a`.  We'll then run a t-test comparing all of the available observations of the two groups **each time we have a new pair of observations**.  If the p-value of the t-test is below 5%, we will reject the null-hypothesis that there is no difference between the distributions; hence, `p.value < 0.05` implies there is a statistically significant difference between the conversion rates.  Finally we'll plot `1-p.value` to represent "confidence" relative to where we are in the sequence.  This essentially simulates what we would see **if we were to continually monitor p-values** as subjects convert or abandon.   We add the 95% confidence line horizontally, as well as a vertical line at `n_obs`, the number of observations our power calculation says to use to conduct a t-test.
 
-```{r}
+```{r warning=FALSE}
 library(ggplot2)
 set.seed(2)
 
-# make our "true" effect larger than the mde
+# make our "true" effect equal to the mde
 effect <- mde
 cr_b <- (1+effect)*cr_a
 observations <- 2*n_obs
@@ -55,7 +55,8 @@ conversions_b <- rbinom(observations, 1, cr_b)
 
 # Calculate p-values at each simultaneous observation of the a and b groups
 tt <- sapply(10:observations, function(x){
-  t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
+  prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 
 tt <- data.frame(p.value = unlist(tt))
@@ -94,13 +95,14 @@ monte_carlo <- function(n_simulations, callback, ...){
 
 Now, we'll use the `monte_carlo` utility function to run 1000 experiments, measuring whether the p.value is less than alpha **after `n_obs` observations**.  If it is, we reject the null hypothesis.  We expect about 800 rejections and about 200 non-rejections, since 200/1000 would represent our expected 20% false negative rate.
 
-```{r}
+```{r warning=FALSE}
 
 reject_at_i <- function(observations, i){
   conversions_a <- rbinom(observations, 1, cr_a)
   conversions_b <- rbinom(observations, 1, cr_b)
-  ( t.test(conversions_a[1:i],
-           conversions_b[1:i])$p.value ) < alpha
+  # ( t.test(conversions_a[1:i],
+  #          conversions_b[1:i])$p.value ) < alpha
+  ( prop.test(c(sum(conversions_a[1:i]),sum(conversions_b[1:i])), c(i,i))$p.value ) < alpha
 }
 
 # run the sim
@@ -118,13 +120,15 @@ table(rejected.H0)
 
 We will use the same functions to test the false positive rate.  In this case, we want to set the two conversion rates to the same value, `cr_a` and confirm that out of 1000 experiments, about 50 show up as having rejected the null hypothesis (and predict a difference in the conversion rates).
 
-```{r}
+```{r warning=FALSE}
 
 reject_at_i <- function(observations, i){
   conversions_a <- rbinom(observations, 1, cr_a)
   conversions_b <- rbinom(observations, 1, cr_a) # this is now the same conversion rate
-  ( t.test(conversions_a[1:i],
-           conversions_b[1:i])$p.value ) < alpha
+  # ( t.test(conversions_a[1:i],
+  #          conversions_b[1:i])$p.value ) < alpha
+  ( prop.test(c(sum(conversions_a[1:i]),sum(conversions_b[1:i])),c(i,i))$p.value ) < alpha
+
 }
 
 # run the sim
@@ -147,7 +151,7 @@ What happens if we don't do a power calculation and instead monitor the conversi
 
 Peeking is widespread when it comes to analyzing experiments.  In fact, some popular testing services peek continuously and automatically notify as soon as a p-value is below alpha.  What you may notice, however, is that p-values can fluctuate around alpha multiple times before "choosing" a side, particularly where the size of an effect is small.  Continuously monitoring p-values will inflate false positive rates.  Let's see what effect continuous peeking has on our false positive rates:
 
-```{r}
+```{r warning=FALSE}
 peeking_method <- function (observations, by=1){
   # create the conversions
   conversions_a <- rbinom(observations, 1, cr_a)
@@ -160,7 +164,9 @@ peeking_method <- function (observations, by=1){
   for (i in seq(from=by,to=observations,by=by)) {
     tryCatch(
       {
-        reject <- ( t.test(conversions_a[1:i],conversions_b[1:i])$p.value ) < alpha
+#        reject <- ( t.test(conversions_a[1:i],conversions_b[1:i])$p.value ) < alpha
+        reject <- ( prop.test(c(sum(conversions_a[1:i]),sum(conversions_b[1:i])), c(i,i))$p.value ) < alpha
+
         if(reject){
           break;
         }
