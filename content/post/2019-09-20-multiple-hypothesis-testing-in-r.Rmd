@@ -9,7 +9,7 @@ tags: []
 
 [edit](https://github.com/ras44/blog/edit/master/content/post/2019-09-20-multiple-hypothesis-testing-in-r.Rmd)
 
-In the [first article of this series](https://ras44.github.io/blog/2019/04/08/validating-type-i-and-ii-errors-in-a-b-tests-in-r.html) we looked at understanding type I and type II errors in the context of an A/B test and highlighted the issue of "peeking".  In the [second](https://ras44.github.io/blog/2019/08/04/calculating-always-valid-p-values-in-r.html), we illustrated a way to calculate always-valid p-values that were immune to "peeking".  We will now explore multiple hypothesis testing: what happens when multiple tests are conducted on the same family of data.
+In the [first article of this series](https://ras44.github.io/blog/2019/04/08/validating-type-i-and-ii-errors-in-a-b-tests-in-r.html) we looked at understanding type I and type II errors in the context of an A/B test and highlighted the issue of "peeking".  In the [second](https://ras44.github.io/blog/2019/08/04/calculating-always-valid-p-values-in-r.html), we illustrated a way to calculate always-valid p-values that were immune to peeking.  We will now explore multiple hypothesis testing: what happens when multiple tests are conducted on the same family of data.
 
 We will set things up as before, with the false positive rate $\alpha = 0.05$ and false negative rate $\beta=0.20$.
 
@@ -81,19 +81,19 @@ In practice, we don't usually test the same thing 1000 times.  We test it once a
 
 
 ## The Family-Wise Error Rate (FWER)
-Now imagine we test two separate statistics using the same source data with each test constrained by the same $\alpha$ and $\beta$ as before.  What is the probability that we will detect *at least one* false positive considering the results of both tests?  This is known as the family-wise error rate (FWER) and would apply to the case where a researcher claims there is a difference between the populations if any of the tests yields a positive result.  It's clear that this could be an issue, as the [family-wise error rate](https://en.wikipedia.org/wiki/Family-wise_error_rate) wikipedia page illustrates:
+Now imagine we test two separate statistics using the same source data with each test constrained by the same $\alpha$ and $\beta$ as before.  What is the probability that we will detect *at least one* false positive considering the results of both tests?  This is known as the family-wise error rate (FWER) and would apply to the case where a researcher claims there is a difference between the populations if any of the tests yields a positive result.  It's clear that this could present issues, as the [family-wise error rate](https://en.wikipedia.org/wiki/Family-wise_error_rate) wikipedia page illustrates:
 
 >> Suppose the treatment is a new way of teaching writing to students, and the control is the standard way of teaching writing. Students in the two groups can be compared in terms of grammar, spelling, organization, content, and so on. As more attributes are compared, it becomes increasingly likely that the treatment and control groups will appear to differ on at least one attribute due to random sampling error alone.
 
 
-To calculate the probability that *at least one* false positive will arise in our two-test example, consider that the probability that one test will not reject the null is $1-\alpha$.  Thus, the probability that both tests will not reject the null is $(1-\alpha)^2)$ and the probability that *at least one* test will reject the null is $1-(1-\alpha)^2$.  For $m$ tests, this generalizes to $1-(1-\alpha)^m$.  With $\alpha=0.05$ and $m=2$, we have:
+What is the FWER for the two tests?  To calculate the probability that *at least one* false positive will arise in our two-test example, consider that the probability that one test will not reject the null is $1-\alpha$.  Thus, the probability that both tests will not reject the null is $(1-\alpha)^2)$ and the probability that *at least one* test will reject the null is $1-(1-\alpha)^2$.  For $m$ tests, this generalizes to $1-(1-\alpha)^m$.  With $\alpha=0.05$ and $m=2$, we have:
 
 ```{r}
 m<-2
 1-(1-alpha)^m
 ```
 
-Let's see if we can produce the same result with a monte carlo simulation.  We will run the monte carlo for `n_trials` and run `n_tests_per_trial`.  For each trial, if *at least one* of the `n_tests_per_trial` results in a rejection of the null, we consider that the trial rejects the null.  We should see that about 1 in 10 trials reject the null.  For what is to come next, we will look at this calculation slightly differently: instead of calculating rejection proportions based on the number of trials, we will calculate the proportion of rejected hypotheses relative to the total number of hypothesis test.  For this to work, we will need to create a rule, which we'll call the "naive method" that says: "if we reject at least one hypothesis in a trial, then we reject all of them".  This is implemeted below:
+Let's see if we can produce the same result with a monte carlo simulation.  We will run the monte carlo for `n_trials` and run `n_tests_per_trial`.  For each trial, if *at least one* of the `n_tests_per_trial` results in a rejection of the null, we consider that the trial rejects the null.  We should see that about 1 in 10 trials reject the null.  This is implemeted below:
 
 ```{r}
 set.seed(1)
@@ -109,16 +109,21 @@ for(i in 1:n_trials){
                              i=n_obs
                              )
   if(!is.na(table(rejected.H0)[2])) {
-    rejects <- rejects + n_tests_per_trial
+    rejects <- rejects + 1
   }
 }
 
-rejects/(n_trials * n_tests_per_trial)
+# Calculate FWER
+rejects/n_trials
 ```
 
-Both results show that two tests on the same family of data will lead to a ~10% chance that a researcher will claim a "significant" result if they look for either test to yield a positive result.  Any claim there is a maximum 5% false positive rate would be mistaken.  As an exercise, test that doing the same on $m=4$ tests will lead to an ~18% chance!  A bad testing platform would be one that claims a maximum 5% false positive rate when any one of multiple tests on the same family of data show significance at the 5% level.  Clearly, if a researcher is going to claim that at least one positive result in $m$ tests indicates a difference in the populations with the a maximum FWER of $\alpha$, then the family-wise error rate must be controlled for, taking into account that $m$ tests have been run.  The "naive method" does not do this.
+Both results show that evaluating two tests on the same family of data will lead to a ~10% chance that a researcher will claim a "significant" result if they look for either test to reject the null.  Any claim there is a maximum 5% false positive rate would be mistaken.  As an exercise, verify that doing the same on $m=4$ tests will lead to an ~18% chance!
 
-There are many ways to control for the FWER, and the most conservative is the [Bonferroni correction](https://en.wikipedia.org/wiki/Bonferroni_correction).  As opposed to the "naive method", the "Bonferroni method" will reject the null hypothesis if $p_i \le \frac{\alpha}{m}$.  We will swtich our `reject_at_i` function for a `p_value_at_i` function, and then add in the Bonferroni correction:
+A bad testing platform would be one that claims a maximum 5% false positive rate when any one of multiple tests on the same family of data show significance at the 5% level.  Clearly, if a researcher is going to claim that the FWER is no more than $\alpha$, then they must control for the FWER and carefully consider how individual tests reject the null.
+
+## Controlling the FWER
+
+There are many ways to control for the FWER, and the most conservative is the [Bonferroni correction](https://en.wikipedia.org/wiki/Bonferroni_correction).  The "Bonferroni method" will reject null hypotheses if $p_i \le \frac{\alpha}{m}$.  Let's switch our `reject_at_i` function for a `p_value_at_i` function, and then add in the Bonferroni correction:
 
 ```{r}
 set.seed(1)
@@ -142,18 +147,17 @@ for(i in 1:n_trials){
                              i=n_obs
                              )
   # Bonferroni-adjust the p-values and reject any cases with p-values <= alpha
-  rejects <- rejects + sum(p_values*n_tests_per_trial <= alpha)
+  rejects <- rejects + sum(any(p_values*n_tests_per_trial <= alpha))
 
 }
 
-rejects/(n_trials * n_tests_per_trial)
+# Calculate FWER
+rejects/n_trials
 ```
 
-With the Bonferroni correction, we see that the realized false positive rate is below the 5% level.
+With the Bonferroni correction, we see that the realized false positive rate is back near the 5% level.  Note that we use `any(...)` to add 1 if any hypothesis is rejected.
 
-Up until now, we have only shown that the Bonferroni correction controls the FWER for the case that all null hypotheses are actually true: the effect is set to zero.  This is called controlling in the *weak sense*.  However, the Bonferroni correction actually guarantees that the FWER is controlled in the *strong sense*, in which we have any configuration of true and non-true null hypothesis.  This is ideal, because in reality we do not know if there is an effect or not.
-
-Other corrections exist that control in the strong sense.  Before we illustrate the control in the strong sense, we will use R's `p.adjust` function to illustrate the Bonferroni and [Holm](https://en.wikipedia.org/wiki/Holm%E2%80%93Bonferroni_method) adjustments to the p-values, still in the case where we have no effect:
+Up until now, we have only shown that the Bonferroni correction controls the FWER for the case that all null hypotheses are actually true: the effect is set to zero.  This is called controlling in the *weak sense*.  Next, let's use R's `p.adjust` function to illustrate the Bonferroni and [Holm](https://en.wikipedia.org/wiki/Holm%E2%80%93Bonferroni_method) adjustments to the p-values:
 
 
 ```{r, warning=FALSE}
@@ -175,28 +179,33 @@ for(i in 1:n_trials){
                           )
   # Bonferroni: adjust the p-values and reject/accept
   bf_reject <- p.adjust(p_values, "bonferroni") <= alpha
-  for(r in bf_reject){
-    res_bf <- c(res_bf, r)
-  }
+  res_bf <- c(res_bf, sum(any(bf_reject)))
 
   # Holm: adjust the p-values and reject/accept
   holm_reject <- p.adjust(sort(p_values), "holm") <= alpha
-  for(r in holm_reject){
-    res_holm <- c(res_holm, r)
-  }
-  
+  res_holm <- c(res_holm, sum(any(holm_reject)))
+
 }
 
+# Calculate FWER
 sum(res_bf)/length(res_bf)
 sum(res_holm)/length(res_holm)
 
 ```
 
 
+We see that the Holm correction is very similar to the Bonferroni correction in the case that the null hypothesis is always true.
 
-We see that the Holm correction is very similar to the Bonferroni correction in the case that the null hypothesis is always true.  However, the Holm correction is uniformly more powerful than the Bonferroni correction.  This means that in the case that there *is* an effect, and the null is false, using the Holm correction will have higher power and be more likely to detect the effect.
+# Strongly controlling the FWER
+Both the Bonferroni and Holm corrections guarantee that the FWER is controlled in the *strong sense*, in which we have any configuration of true and non-true null hypothesis.  This is ideal, because in reality we do not know if there is an effect or not.
 
-Let's test that using our simulations by setting the effect size to the minimum detectable effect in about half the cases.  Note the slightly modified `p_value_at_i` function as well as the `null_true` variable which will randomly decide if there is a minimum detectable effect size or not for that particular trial.
+The Holm correction is uniformly more powerful than the Bonferroni correction, meaning that in the case that there *is* an effect and the null is false, using the Holm correction will be more likely to detect positives.
+
+Let's test this by randomly setting the effect size to the minimum detectable effect in about half the cases.  Note the slightly modified `p_value_at_i` function as well as the `null_true` variable which will randomly decide if there is a minimum detectable effect size or not for that particular trial.
+
+Note that in the below we will not calculate the FWER using the same `any(...)` construct from the previous code segments.  If we were to do this, we would see that the both corrections have the same FWER *and* the same power (since the outcome of the trial is then decided by whether at least one of the hypothesese was rejected for the trial).  Instead, we will tabulate the result for each of the hypotheses.  We should see the same false positive rate[^2], but great power for the Holm method.
+
+[^2]: Verify this by inspecting the `table_bf` and `table_holm` variables.
 
 ```{r, warning=FALSE}
 set.seed(1)
@@ -262,11 +271,11 @@ print(paste0("Power Bonferroni: ", round(power_bf,3), " Power Holm: ", round(pow
 print(paste0("Power Holm/Power Bonferroni: ", round(power_holm/power_bf,3)))
 ```
 
-Indeed, we observe that the while the realized false positive rates of both the Bonferroni and Holm methods are very similar, the Holm method has greater power.  These corrections essentially reduce our $\alpha$ threshold so that across the family of tests we produce false positives with a probability of no more than $\alpha$, however this comes at the expense of a reduction in power.
+Indeed, we observe that the while the realized false positive rates of both the Bonferroni and Holm methods are very similar, the Holm method has greater power.  These corrections essentially reduce our threshold for each test so that across the family of tests we produce false positives with a probability of no more than $\alpha$.  This comes at the expense of a reduction in power from the optimal power ($1-\beta$).
 
-We have illustrated three methods for deciding what null hypotheses in a family of tests to reject.  The "naive method" rejects all if at least one is rejected at the $\alpha$ level.  The "Bonferroni method" rejects hypotheses at the $\alpha/m$ level.  And the "Holm method" has a more involved algorithm for which hypotheses to reject.  The Bonferroni and Holm methods have the property that they control the probability of detecting false positives across the family of tests at $\alpha$.
+We have illustrated two methods for deciding what null hypotheses in a family of tests to reject.  The Bonferroni method rejects hypotheses at the $\alpha/m$ level.  The Holm method has a more involved algorithm for which hypotheses to reject.  The Bonferroni and Holm methods have the property that *do* they control the FWER at $\alpha$ and Holm is uniformly more powerful than Bonferroni.
 
-This raises an interesting question: What if we are not concerned about controlling the probability of detecting false positives, but something else?  We might be more interested in controlling the expected proportion of false discoveries amongst the rejected hypotheses, known as the false discovery rate.  As a quick preview, let's calculate the false discovery rate for our two cases:
+This raises an interesting question: What if we are not concerned about controlling the probability of detecting at least one false positive, but something else?  We might be more interested in controlling the expected proportion of false discoveries amongst all discoveries, known as the false discovery rate.  As a quick preview, let's calculate the false discovery rate for our two cases:
 
 ```{r}
 table_holm
@@ -277,4 +286,4 @@ fdr_bf <- table_bf['1','0']/sum(table_bf['1',])
 fdr_bf
 ```
 
-We note that the Bonferroni and Holm methods produce different false discovery rates, and we previously noted that Holm was uniformly more powerful than Bonferroni.  By relaxing the control metric to false discovery rates instead of false positive rates, we will be able to produce more powerful results.  We will look at the false discovery rate and other possible control measures in a future article.
+By choosing to control for a metric other than the FWER, we may be able to produce results with power closer to the optimal power ($1-\beta$).  We will look at the false discovery rate and other measures in a future article.
