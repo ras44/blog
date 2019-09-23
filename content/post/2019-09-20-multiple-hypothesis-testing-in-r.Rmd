@@ -7,7 +7,9 @@ categories: []
 tags: []
 ---
 
-In the first article of this series we looked at understanding type I and type II errors in the context of an A/B test and highlighted the issue of "peeking" in A/B tests.  In the second, we illustrated a way to calculate always-valid p-values that were immune to "peeking".  We will now explore multiple hypothesis testing: what happens when multiple tests are conducted on the same family of data.
+[edit](https://github.com/ras44/blog/edit/master/content/post/2019-09-20-multiple-hypothesis-testing-in-r.Rmd)
+
+In the [first article of this series](https://ras44.github.io/blog/2019/04/08/validating-type-i-and-ii-errors-in-a-b-tests-in-r.html) we looked at understanding type I and type II errors in the context of an A/B test and highlighted the issue of "peeking".  In the [second](https://ras44.github.io/blog/2019/08/04/calculating-always-valid-p-values-in-r.html), we illustrated a way to calculate always-valid p-values that were immune to "peeking".  We will now explore multiple hypothesis testing: what happens when multiple tests are conducted on the same family of data.
 
 We will set things up as before, with the false positive rate $\alpha = 0.05$ and false negative rate $\beta=0.20$.
 
