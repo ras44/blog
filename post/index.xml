@@ -17,8 +17,7 @@
       <pubDate>Fri, 20 Sep 2019 00:00:00 +0000</pubDate>
       
       <guid>/2019/09/20/multiple-hypothesis-testing-in-r.html</guid>
-      <description>In the first article of this series we looked at understanding type I and type II errors in the context of an A/B test and highlighted the issue of “peeking” in A/B tests. In the second, we illustrated a way to calculate always-valid p-values that were immune to “peeking”. We will now explore what happens when multiple tests are conducted at the same time, or multiple hypothesis testing.
-We will set things up as before, with the false positive rate \(\alpha = 0.</description>
+      <description>In the first article of this series we looked at understanding type I and type II errors in the context of an A/B test and highlighted the issue of “peeking” in A/B tests. In the second, we illustrated a way to calculate always-valid p-values that were immune to “peeking”. We will now explore multiple hypothesis testing: what happens when multiple tests are conducted on the same family of data.</description>
     </item>
     
     <item>
