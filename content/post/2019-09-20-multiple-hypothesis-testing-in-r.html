@@ -66,7 +66,7 @@ table(rejected.H0)</code></pre>
 <p>In practice, we don’t usually test the same thing 1000 times. We test it once and state that there is a maximum 5% chance that we have falsely said there was an effect when there wasn’t one<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
 <div id="the-family-wise-error-rate-fwer" class="section level2">
 <h2>The Family-Wise Error Rate (FWER)</h2>
-<p>Now imagine we test two separate statistics using the same source data with each test constrained by the same <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> as before. What is the probability that we will detect <em>at least one</em> false positive considering the results of both tests? This is known as the family-wise error rate (FWER) and would apply to the case where a researcher claims there is a difference between the populations if any of the tests yields a positive result. It’s clear that this could present issues, as the <a href="https://en.wikipedia.org/wiki/Family-wise_error_rate">family-wise error rate</a> wikipedia page illustrates:</p>
+<p>Now imagine we test two separate statistics using the same source data with each test constrained by the same <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> as before. What is the probability that we will detect <em>at least one</em> false positive considering the results of both tests? This is known as the family-wise error rate (FWER<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>) and would apply to the case where a researcher claims there is a difference between the populations if any of the tests yields a positive result. It’s clear that this could present issues, as the <a href="https://en.wikipedia.org/wiki/Family-wise_error_rate">family-wise error rate</a> wikipedia page illustrates:</p>
 <blockquote>
 <blockquote>
 <p>Suppose the treatment is a new way of teaching writing to students, and the control is the standard way of teaching writing. Students in the two groups can be compared in terms of grammar, spelling, organization, content, and so on. As more attributes are compared, it becomes increasingly likely that the treatment and control groups will appear to differ on at least one attribute due to random sampling error alone.</p>
@@ -171,7 +171,7 @@ sum(res_bf)/length(res_bf)</code></pre>
 <p>Both the Bonferroni and Holm corrections guarantee that the FWER is controlled in the <em>strong sense</em>, in which we have any configuration of true and non-true null hypothesis. This is ideal, because in reality we do not know if there is an effect or not.</p>
 <p>The Holm correction is uniformly more powerful than the Bonferroni correction, meaning that in the case that there <em>is</em> an effect and the null is false, using the Holm correction will be more likely to detect positives.</p>
 <p>Let’s test this by randomly setting the effect size to the minimum detectable effect in about half the cases. Note the slightly modified <code>p_value_at_i</code> function as well as the <code>null_true</code> variable which will randomly decide if there is a minimum detectable effect size or not for that particular trial.</p>
-<p>Note that in the below we will not calculate the FWER using the same <code>any(...)</code> construct from the previous code segments. If we were to do this, we would see that the both corrections have the same FWER <em>and</em> the same power (since the outcome of the trial is then decided by whether at least one of the hypothesese was rejected for the trial). Instead, we will tabulate the result for each of the hypotheses. We should see the same false positive rate<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>, but great power for the Holm method.</p>
+<p>Note that in the below we will not calculate the FWER using the same <code>any(...)</code> construct from the previous code segments. If we were to do this, we would see that the both corrections have the same FWER <em>and</em> the same power (since the outcome of the trial is then decided by whether at least one of the hypothesese was rejected for the trial). Instead, we will tabulate the result for each of the hypotheses. We should see the same false positive rate<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>, but great power for the Holm method.</p>
 <pre class="r"><code>set.seed(1)
 
 p_value_at_i &lt;- function(observations, i, cr_a, cr_b){
@@ -259,6 +259,8 @@ fdr_bf</code></pre>
 <hr />
 <ol>
 <li id="fn1"><p>And maximum 20% chance that we said there wasn’t an effect when there was one.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-<li id="fn2"><p>Verify this by inspecting the <code>table_bf</code> and <code>table_holm</code> variables.<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>Hochberg, Y.; Tamhane, A. C. (1987). Multiple Comparison Procedures. New York: Wiley. p. 5. ISBN 978-0-471-82222-6<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p><a href="https://www.jstor.org/stable/2336325?seq=1#page_scan_tab_contents">A sharper Bonferroni procedure for multiple tests of significance</a><a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>Verify this by inspecting the <code>table_bf</code> and <code>table_holm</code> variables.<a href="#fnref4" class="footnote-back">↩</a></p></li>
 </ol>
 </div>

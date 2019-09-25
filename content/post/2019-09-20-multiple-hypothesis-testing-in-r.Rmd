@@ -81,10 +81,12 @@ In practice, we don't usually test the same thing 1000 times.  We test it once a
 
 
 ## The Family-Wise Error Rate (FWER)
-Now imagine we test two separate statistics using the same source data with each test constrained by the same $\alpha$ and $\beta$ as before.  What is the probability that we will detect *at least one* false positive considering the results of both tests?  This is known as the family-wise error rate (FWER) and would apply to the case where a researcher claims there is a difference between the populations if any of the tests yields a positive result.  It's clear that this could present issues, as the [family-wise error rate](https://en.wikipedia.org/wiki/Family-wise_error_rate) wikipedia page illustrates:
+Now imagine we test two separate statistics using the same source data with each test constrained by the same $\alpha$ and $\beta$ as before.  What is the probability that we will detect *at least one* false positive considering the results of both tests?  This is known as the family-wise error rate (FWER[^3][^4]) and would apply to the case where a researcher claims there is a difference between the populations if any of the tests yields a positive result.  It's clear that this could present issues, as the [family-wise error rate](https://en.wikipedia.org/wiki/Family-wise_error_rate) wikipedia page illustrates:
 
 >> Suppose the treatment is a new way of teaching writing to students, and the control is the standard way of teaching writing. Students in the two groups can be compared in terms of grammar, spelling, organization, content, and so on. As more attributes are compared, it becomes increasingly likely that the treatment and control groups will appear to differ on at least one attribute due to random sampling error alone.
 
+[^3]: Hochberg, Y.; Tamhane, A. C. (1987). Multiple Comparison Procedures. New York: Wiley. p. 5. ISBN 978-0-471-82222-6
+[^4]: [A sharper Bonferroni procedure for multiple tests of significance](https://www.jstor.org/stable/2336325?seq=1#page_scan_tab_contents)
 
 What is the FWER for the two tests?  To calculate the probability that *at least one* false positive will arise in our two-test example, consider that the probability that one test will not reject the null is $1-\alpha$.  Thus, the probability that both tests will not reject the null is $(1-\alpha)^2)$ and the probability that *at least one* test will reject the null is $1-(1-\alpha)^2$.  For $m$ tests, this generalizes to $1-(1-\alpha)^m$.  With $\alpha=0.05$ and $m=2$, we have:
 
