@@ -7,7 +7,7 @@ categories: []
 tags: []
 ---
 
-[edit](https://github.com/ras44/blog/edit/master/content/post/2019-11-05-in-database-logistic-regression.Rmd)
+[edit](https://github.com/ras44/blog/edit/master/content/post/2019-11-05-in-database-logistic-regression-with-r.Rmd)
 
 In a [previous article](https://rviews.rstudio.com/2018/11/07/in-database-xgboost-predictions-with-r/) we illustrated how to calculate xgboost model predictions in-database.  This was [referenced](https://github.com/tidymodels/tidypredict/issues/40) and incorporated into [tidypredict](https://github.com/tidymodels/tidypredict).  After learning more about what the tidypredict team are up to, I discovered another tidyverse package called [modeldb](https://github.com/tidymodels/modeldb) that fits  models in-database.  It currently supports linear regression and k-means clustering, so I thought I would provide an example of how to do in-database logistic regression.
 
