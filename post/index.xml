@@ -6,10 +6,21 @@
     <description>Recent content in Posts on Roland&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 20 Sep 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 05 Nov 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>In-Database Logistic Regression with R</title>
+      <link>/2019/11/05/in-database-logistic-regression-with-r.html</link>
+      <pubDate>Tue, 05 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/2019/11/05/in-database-logistic-regression-with-r.html</guid>
+      <description>edit
+In a previous article we illustrated how to calculate xgboost model predictions in-database. This was referenced and incorporated into tidypredict. After learning more about what the tidypredict team are up to, I discovered another tidyverse package called modeldb that fits models in-database. It currently supports linear regression and k-means clustering, so I thought I would provide an example of how to do in-database logistic regression.
+Rather than focusing on the details of logistic regression, we will focus more on how we can use R and some carefully written SQL statements iteratively minimize a cost function.</description>
+    </item>
     
     <item>
       <title>Multiple Hypothesis Testing in R</title>
