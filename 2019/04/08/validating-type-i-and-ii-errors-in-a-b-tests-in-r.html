@@ -109,7 +109,6 @@ conversions_b &lt;- rbinom(observations, 1, cr_b)
 
 # Calculate p-values at each simultaneous observation of the a and b groups
 tt &lt;- sapply(10:observations, function(x){
-  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
   prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 
@@ -144,8 +143,6 @@ monte_carlo &lt;- function(n_simulations, callback, ...){
 <pre class="r"><code>reject_at_i &lt;- function(observations, i){
   conversions_a &lt;- rbinom(observations, 1, cr_a)
   conversions_b &lt;- rbinom(observations, 1, cr_b)
-  # ( t.test(conversions_a[1:i],
-  #          conversions_b[1:i])$p.value ) &lt; alpha
   ( prop.test(c(sum(conversions_a[1:i]),sum(conversions_b[1:i])), c(i,i))$p.value ) &lt; alpha
 }
 
@@ -165,8 +162,6 @@ table(rejected.H0)</code></pre>
 <pre class="r"><code>reject_at_i &lt;- function(observations, i){
   conversions_a &lt;- rbinom(observations, 1, cr_a)
   conversions_b &lt;- rbinom(observations, 1, cr_a) # this is now the same conversion rate
-  # ( t.test(conversions_a[1:i],
-  #          conversions_b[1:i])$p.value ) &lt; alpha
   ( prop.test(c(sum(conversions_a[1:i]),sum(conversions_b[1:i])),c(i,i))$p.value ) &lt; alpha
 
 }
@@ -201,7 +196,6 @@ table(rejected.H0)</code></pre>
   for (i in seq(from=by,to=observations,by=by)) {
     tryCatch(
       {
-#        reject &lt;- ( t.test(conversions_a[1:i],conversions_b[1:i])$p.value ) &lt; alpha
         reject &lt;- ( prop.test(c(sum(conversions_a[1:i]),sum(conversions_b[1:i])), c(i,i))$p.value ) &lt; alpha
 
         if(reject){

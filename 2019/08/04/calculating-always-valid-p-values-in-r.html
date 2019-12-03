@@ -174,7 +174,6 @@ avpvs &lt;- calc_avpvs(observations, conversions_a, conversions_b)
 
 # And we'll calculate &quot;regular&quot; p-values as well
 tt &lt;- sapply(10:observations, function(x){
-  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
   prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 
@@ -212,7 +211,6 @@ avpvs &lt;- calc_avpvs(observations, conversions_a, conversions_b)
 
 # And we'll calculate &quot;regular&quot; p-values as well
 tt &lt;- sapply(10:observations, function(x){
-  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
   prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 tt &lt;- data.frame(p.value = unlist(tt))
@@ -273,7 +271,6 @@ avpvs_tse &lt;- calc_avpvs(observations, conversions_a, conversions_b, tau_sq = 
 
 # And we'll calculate &quot;regular&quot; p-values as well
 tt &lt;- sapply(10:observations, function(x){
-  # t.test(conversions_a[1:x],conversions_b[1:x])$p.value
   prop.test(c(sum(conversions_a[1:x]),sum(conversions_b[1:x])), c(x,x))$p.value
 })
 tt &lt;- data.frame(p.value = unlist(tt))
