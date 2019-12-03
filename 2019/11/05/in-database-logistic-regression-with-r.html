@@ -369,7 +369,7 @@ summary {
 </div>
 
 
-<p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-11-05-in-database-logistic-regression.Rmd">edit</a></p>
+<p><a href="https://github.com/ras44/blog/edit/master/content/post/2019-11-05-in-database-logistic-regression-with-r.Rmd">edit</a></p>
 <p>In a <a href="https://rviews.rstudio.com/2018/11/07/in-database-xgboost-predictions-with-r/">previous article</a> we illustrated how to calculate xgboost model predictions in-database. This was <a href="https://github.com/tidymodels/tidypredict/issues/40">referenced</a> and incorporated into <a href="https://github.com/tidymodels/tidypredict">tidypredict</a>. After learning more about what the tidypredict team are up to, I discovered another tidyverse package called <a href="https://github.com/tidymodels/modeldb">modeldb</a> that fits models in-database. It currently supports linear regression and k-means clustering, so I thought I would provide an example of how to do in-database logistic regression.</p>
 <p>Rather than focusing on the details of logistic regression, we will focus more on how we can use R and some carefully written SQL statements iteratively minimize a cost function. We will also use the <code>condusco</code> R package, which allows us to iterate through the results of a query easily.</p>
 <div id="a-simple-logistic-regression-example" class="section level2">
@@ -449,6 +449,7 @@ insert_upload_job(
   values = sim,
   write_disposition = &quot;WRITE_TRUNCATE&quot;
 )</code></pre>
+<pre><code>## Auto-refreshing stale OAuth token.</code></pre>
 <p>Now we’ll create the pipelines to do the logistic regression. Please note that the code below is quite verbose. While all of it is needed for the code to work, we’ll just focus on understanding how a couple steps work. Once we understand one step, the rest is pretty easy. Feel free to skip <a href="#run-pipeline">ahead</a>.</p>
 <p>First, we create a pipeline that does two things:</p>
 <ul>
@@ -1025,16 +1026,7 @@ run_pipeline_gbq(
     wr('{{{project}}}'),
     use_legacy_sql = FALSE
   )</code></pre>
-<pre><code>## 
-Running job -:  1s:
-Running job \:  1s:
-Running job |:  2s:
-Running job /:  2s:
-Running job -:  2s:
-Running job \:  2s:
-Running job |:  2s:
-                                                                         
-10.0 megabytes processed</code></pre>
+<pre><code>## 10.0 megabytes processed</code></pre>
 <pre><code>##         x2        x1  CONSTANT
 ## 1 5.007962 -3.179922 -1.084828</code></pre>
 <p>As expected, these results are pretty close to our original <code>beta</code> values.</p>
