@@ -16,8 +16,10 @@ tags: []
 <p class="caption">The essential branches in the Gitflow branching model</p>
 </div>
 <p>Gitflow was perhaps the first well-publicized Git branching model. Other branching models followed, the most famous being GitHub Flow, which proposed a more simplified philosophy aimed at software deployed to production continuously.</p>
+<div id="software-development-vs.exploratory-research" class="section level2">
+<h2>Software development vs. exploratory research</h2>
 <p>Unlike software development, research is not composed of a set of known features in various states of development. Research is exploratory and open-ended: presented with a question, we attempt to answer it, often using multiple hypotheses that we accept, reject, or evolve as new information is discovered.</p>
-<p>This requires that we adapt Git branching models to the research process. For example, many research branches of exploration might never be incorporated into our published work, but are nevertheless valuable as chronicled paths: helping us answer questions like: “what would have happened if we had done X,Y,Z?”, the oft-asked “did we ever try A,B, or C?”, and the occasional “oops, we tried A, B, and C but we just discovered a bug and need to re-try A and B with the bug fixed”.</p>
+<p>This requires that we adapt Git branching models to the research process. For example, many branches of exploration might never be incorporated into our published work, but are nevertheless valuable as chronicled paths: helping us answer questions like: “what would have happened if we had done X,Y,Z?”, the oft-asked “did we ever try A,B, or C?”, and the occasional “oops, we tried A, B, and C but we just discovered a bug and need to re-try A and B with the bug fixed”.</p>
 <blockquote>
 <p>“many branches of exploration might never be incorporated into our published work, but are nevertheless valuable as chronicled paths”</p>
 </blockquote>
@@ -29,6 +31,7 @@ tags: []
 </ul>
 <p>This is <strong>reproducibility</strong> not only in the sense that a set of results is reproducible given the current code, but the entire research process is reproducible.</p>
 <p>In what follows, we propose Research Flow, a hybrid Git branching model adapted for research, and we end with a few handy Git and GitHub tips and patterns that facilitate reproducibilty, collaboration, and communication.</p>
+</div>
 <div id="in-case-youre-asking-why-git" class="section level2">
 <h2>In case you’re asking, ‘Why git?’</h2>
 <p>This article assumes the reader understands the fundamental value of version control and has already chosen to use git. It assumes intermediate knowledge of Git and GitHub. For those getting started with Git, some recommended starter resources follow:</p>
@@ -40,58 +43,24 @@ tags: []
 </div>
 <div id="adapting-git-workflows-for-research" class="section level1">
 <h1>Adapting Git workflows for research</h1>
-<p>The original <a href="https://nvie.com/posts/a-successful-git-branching-model/">“A successful Git branching model”</a> article defines a set of branches with specific rules as to how they are created and merged. Summarizing, we have:</p>
-<div id="gitflow-branches" class="section level3">
-<h3>Gitflow branches</h3>
-<ul>
-<li><strong>master</strong>
-<ul>
-<li>HEAD always reflects a <em>production-ready</em> state, matching a release</li>
-</ul></li>
-<li><strong>develop</strong>
-<ul>
-<li>HEAD always reflects latest delivered development changes for the next release</li>
-</ul></li>
-<li><strong>feature</strong>
-<ul>
-<li>used to develop new features for a future release</li>
-</ul></li>
-<li><strong>release</strong>
-<ul>
-<li>support preparation of a new production release with bugfixes but no new features</li>
-</ul></li>
-<li><strong>hotfix</strong>
-<ul>
-<li>used to act immediately upon an undesired state of a live production version</li>
-</ul></li>
-</ul>
-</div>
-<div id="github-flow-branches" class="section level3">
-<h3>GitHub Flow branches</h3>
-<ul>
-<li><strong>master</strong>
-<ul>
-<li>HEAD always reflects the <em>production</em> state, always deployed</li>
-</ul></li>
-<li><strong>any other branch</strong>
-<ul>
-<li>a descriptively-named branch contatining any proposed changes</li>
-</ul></li>
-</ul>
-</div>
+<p>The original <a href="https://nvie.com/posts/a-successful-git-branching-model/">“A successful Git branching model”</a> article defines a set of branches (<strong>master</strong>, <strong>develop</strong>, <strong>feature</strong>, <strong>release</strong>, <strong>hotfix</strong>) with specific rules as to how they are created and merged. Similarly, GitHub Flow defines just two types of branches (<strong>master</strong>, <strong>any other branch</strong>).</p>
 <div id="research-flow" class="section level2">
 <h2>Research Flow</h2>
 <p>We propose a hybrid workflow for research with the following modifications:</p>
 <ul>
-<li>we use GitHub Flow, but with two principal branches: <strong>master</strong> and <strong>devel</strong></li>
+<li>two principal branches
+<ul>
+<li><strong>master</strong></li>
+<li><strong>devel</strong></li>
+</ul></li>
 <li>GitHub releases are used for publication:
 <ul>
 <li><strong>master</strong> chronicles the <em>publication</em> of results</li>
 <li><strong>devel</strong> contains <em>work-in-progress</em></li>
-<li>on publication, <strong>devel</strong> is merged into <strong>master</strong> and a release is created</li>
-<li>we adapt the semantic versioning of releases to publication</li>
+<li>to publish, <strong>devel</strong> is merged into <strong>master</strong> and a release is created</li>
+<li>we adapt the semantic versioning of software releases to publication (see below)</li>
 </ul></li>
-<li>we use flexible <strong>research branches</strong> to sandbox exploratory work
+<li>we use <strong>research branches</strong> to sandbox exploratory work
 <ul>
 <li>these are just GitHub Flow’s familiar <strong>any other branches</strong>: descriptively-named branches containing any proposed changes</li>
 </ul></li>
@@ -113,7 +82,13 @@ tags: []
 <div id="releases-on-master-are-now-publications" class="section level3">
 <h3>Releases on master are now publications</h3>
 <p>In release-based software development, software features are developed and incorporated into a particular release. In the research process, we publish what we believe to be the truth periodically via <em>publications</em> (think journal article, a group presentation, or even an email).</p>
-<p>In Research Flow, <strong>master</strong> holds a record of tagged releases that represent publications. Cloning the repo or visiting its default main branch (<strong>master</strong>) allows one to browse the most recent <em>publication</em>. Visiting the repo’s <a href="https://help.github.com/en/github/administering-a-repository/viewing-your-repositorys-releases-and-tags">releases page</a> shows what publications exist. And <strong>comparing releases</strong> allows one to see <a href="https://help.github.com/en/github/administering-a-repository/comparing-releases">see how publications have changed</a>.</p>
+<p>In Research Flow:</p>
+<ul>
+<li><strong>master</strong> holds a record of tagged releases that represent publications</li>
+<li>cloning the repo or visiting its default main branch (<strong>master</strong>) allows one to browse the most recent <em>publication</em></li>
+<li>visiting the repo’s <a href="https://help.github.com/en/github/administering-a-repository/viewing-your-repositorys-releases-and-tags">releases page</a> shows what publications exist</li>
+<li><strong>comparing releases</strong> allows one to see <a href="https://help.github.com/en/github/administering-a-repository/comparing-releases">see how publications have changed</a>.</li>
+</ul>
 </div>
 <div id="semantic-versioning-applied-to-publication" class="section level3">
 <h3>Semantic versioning applied to publication</h3>
