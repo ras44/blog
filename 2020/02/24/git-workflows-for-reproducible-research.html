@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.54.0" />
+
+
+<title>Git Workflows for Reproducible Research - Roland&#39;s Blog</title>
+<meta property="og:title" content="Git Workflows for Reproducible Research - Roland&#39;s Blog">
+
+
+  <link href='../../../favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../" class="nav-logo">
+    <img src="../../../images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="https://github.com/ras44">GitHub</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">12 min read</span>
+    
+
+    <h1 class="article-title">Git Workflows for Reproducible Research</h1>
+
+    
+    <span class="article-date">2020-02-24</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p><a href="https://github.com/ras44/blog/edit/master/content/post/2020-02-24-git-workflows-for-reproducible-research.Rmd">edit</a></p>
+<p>About 10 years ago, Vincent Driessen published the seminal post <a href="https://nvie.com/posts/a-successful-git-branching-model/">“A successful Git branching model”</a> describing a logical process for developing, releasing, and fixing software projects using Git branches. It quickly became knows as Gitflow, and is one of the most widely used branching models for release-based software development.</p>
+<div class="figure">
+<img src="../../../post/2020-02-24-git-workflows-for-reproducible-research_files/git-model@2x.png" alt="The essential branches in the Gitflow branching model" width="600" />
+<p class="caption">The essential branches in the Gitflow branching model</p>
+</div>
+<p>Gitflow was perhaps the first well-publicized Git branching model. Other branching models followed, the most famous being GitHub Flow, which proposed a more simplified philosophy aimed at software deployed to production continuously.</p>
+<p>Unlike software development, research is not composed of a set of known features in various states of development. Research is exploratory and open-ended: presented with a question, we attempt to answer it, often using multiple hypotheses that we accept, reject, or evolve as new information is discovered.</p>
+<p>This requires that we adapt Git branching models to the research process. For example, many research branches of exploration might never be incorporated into our published work, but are nevertheless valuable as chronicled paths: helping us answer questions like: “what would have happened if we had done X,Y,Z?”, the oft-asked “did we ever try A,B, or C?”, and the occasional “oops, we tried A, B, and C but we just discovered a bug and need to re-try A and B with the bug fixed”.</p>
+<blockquote>
+<p>“many branches of exploration might never be incorporated into our published work, but are nevertheless valuable as chronicled paths”</p>
+</blockquote>
+<p>In this post, in the spirit of Gitflow and GitHub Flow, we outline a branching model used to successfully manage research and development projects for the past few years. In this manifestation, Git is the modern, collaborative “lab-notebook” that allows an individual or group to chronicle:</p>
+<ul>
+<li>what hypotheses do we want to explore at each juncture?</li>
+<li>what results do a particular hypothesis produce?</li>
+<li>what hypotheses were studied, or not, to produce a particular set of results?</li>
+</ul>
+<p>This is <strong>reproducibility</strong> not only in the sense that a set of results is reproducible given the current code, but the entire research process is reproducible.</p>
+<p>In what follows, we propose Research Flow, a hybrid Git branching model adapted for research, and we end with a few handy Git and GitHub tips and patterns that facilitate reproducibilty, collaboration, and communication.</p>
+<div id="in-case-youre-asking-why-git" class="section level2">
+<h2>In case you’re asking, ‘Why git?’</h2>
+<p>This article assumes the reader understands the fundamental value of version control and has already chosen to use git. It assumes intermediate knowledge of Git and GitHub. For those getting started with Git, some recommended starter resources follow:</p>
+<ul>
+<li>Jenny Bryan’s <a href="https://happygitwithr.com/">Happy Git and GitHub for the useR</a></li>
+<li>Bryan J. 2017. Excuse me, do you have a moment to talk about version control? PeerJ Preprints 5:e3159v2 <a href="https://doi.org/10.7287/peerj.preprints.3159v2" class="uri">https://doi.org/10.7287/peerj.preprints.3159v2</a></li>
+<li><a href="https://git-school.github.io/visualizing-git">Visualizing Git</a></li>
+</ul>
+</div>
+<div id="adapting-git-workflows-for-research" class="section level1">
+<h1>Adapting Git workflows for research</h1>
+<p>The original <a href="https://nvie.com/posts/a-successful-git-branching-model/">“A successful Git branching model”</a> article defines a set of branches with specific rules as to how they are created and merged. Summarizing, we have:</p>
+<div id="gitflow-branches" class="section level3">
+<h3>Gitflow branches</h3>
+<ul>
+<li><strong>master</strong>
+<ul>
+<li>HEAD always reflects a <em>production-ready</em> state, matching a release</li>
+</ul></li>
+<li><strong>develop</strong>
+<ul>
+<li>HEAD always reflects latest delivered development changes for the next release</li>
+</ul></li>
+<li><strong>feature</strong>
+<ul>
+<li>used to develop new features for a future release</li>
+</ul></li>
+<li><strong>release</strong>
+<ul>
+<li>support preparation of a new production release with bugfixes but no new features</li>
+</ul></li>
+<li><strong>hotfix</strong>
+<ul>
+<li>used to act immediately upon an undesired state of a live production version</li>
+</ul></li>
+</ul>
+</div>
+<div id="github-flow-branches" class="section level3">
+<h3>GitHub Flow branches</h3>
+<ul>
+<li><strong>master</strong>
+<ul>
+<li>HEAD always reflects the <em>production</em> state, always deployed</li>
+</ul></li>
+<li><strong>any other branch</strong>
+<ul>
+<li>a descriptively-named branch contatining any proposed changes</li>
+</ul></li>
+</ul>
+</div>
+<div id="research-flow" class="section level2">
+<h2>Research Flow</h2>
+<p>We propose a hybrid workflow for research with the following modifications:</p>
+<ul>
+<li>we use GitHub Flow, but with two principal branches: <strong>master</strong> and <strong>devel</strong></li>
+<li>GitHub releases are used for publication:
+<ul>
+<li><strong>master</strong> chronicles the <em>publication</em> of results</li>
+<li><strong>devel</strong> contains <em>work-in-progress</em></li>
+<li>on publication, <strong>devel</strong> is merged into <strong>master</strong> and a release is created</li>
+<li>we adapt the semantic versioning of releases to publication</li>
+</ul></li>
+<li>we use flexible <strong>research branches</strong> to sandbox exploratory work
+<ul>
+<li>these are just GitHub Flow’s familiar <strong>any other branches</strong>: descriptively-named branches containing any proposed changes</li>
+</ul></li>
+</ul>
+<div id="features-of-research-flow" class="section level3">
+<h3>Features of Research Flow</h3>
+<p>Using this, any visitor to a Research Flow repo can:</p>
+<ul>
+<li>browse the most recently published results by visiting the master branch</li>
+<li>check-out a previous publication via its tag, eg. <code>git checkout v1.1.0 (2019-10-15)</code></li>
+<li>view available publications, and <a href="https://help.github.com/en/github/administering-a-repository/comparing-releases">see how they have evolved</a>, by visiting the repo’s <a href="https://help.github.com/en/github/administering-a-repository/viewing-your-repositorys-releases-and-tags">releases page</a></li>
+<li>peek at work-in-progress in the <strong>devel</strong> branch</li>
+<li>contribute to work-in-progress by creating a descriptively-named <strong>research branch</strong>, adding their updates, and submitting a pull request to merge into <strong>devel</strong> or another <strong>research branch</strong></li>
+</ul>
+</div>
+</div>
+<div id="research-flow-details" class="section level2">
+<h2>Research Flow details</h2>
+<div id="releases-on-master-are-now-publications" class="section level3">
+<h3>Releases on master are now publications</h3>
+<p>In release-based software development, software features are developed and incorporated into a particular release. In the research process, we publish what we believe to be the truth periodically via <em>publications</em> (think journal article, a group presentation, or even an email).</p>
+<p>In Research Flow, <strong>master</strong> holds a record of tagged releases that represent publications. Cloning the repo or visiting its default main branch (<strong>master</strong>) allows one to browse the most recent <em>publication</em>. Visiting the repo’s <a href="https://help.github.com/en/github/administering-a-repository/viewing-your-repositorys-releases-and-tags">releases page</a> shows what publications exist. And <strong>comparing releases</strong> allows one to see <a href="https://help.github.com/en/github/administering-a-repository/comparing-releases">see how publications have changed</a>.</p>
+</div>
+<div id="semantic-versioning-applied-to-publication" class="section level3">
+<h3>Semantic versioning applied to publication</h3>
+<p>In release-based software development, releases are commonly labeled with a <a href="https://semver.org/">semantic version</a> that defines how the software functionality has changed from the previous release.</p>
+<p>In our research-flow context, <strong>master</strong> holds a record of published works, semantically versioned to show how the published information has changed.</p>
+<p>To help quickly understand how publications have changed, we recommend versioning publications with <code>Major.Minor.Patch</code> (eg. <code>1.0.0</code>), followed by an optional publication date:</p>
+<ul>
+<li><code>Major</code>: tracks changes to <em>already published information</em> including information removal</li>
+<li><code>Minor</code>: tracks new information added that doesn’t conflict with already published information</li>
+<li><code>Patch</code>: tracks adjustments to <em>how information that has already been published is presented</em>, no substantial changes to the information itself</li>
+</ul>
+<p>An example of a sequence of publication release tags on <strong>master</strong>:</p>
+<pre><code>v1.0.0 (2019-10-01)  # first publication with result A (first publication, major)
+v1.1.0 (2019-10-15)  # added code and new results B, C (minor)
+v1.1.1 (2019-10-16)  # fixed typo, added graph showing C more clearly (patch)
+v2.0.0 (2019-11-30)  # removed result A based on now invalidated data (major)
+v3.0.0 (2019-12-05)  # fixed bug in calculation of B, meaning the B result has changed, reformatted graph (major overrides patch)</code></pre>
+</div>
+<div id="research-branches" class="section level3">
+<h3>Research branches</h3>
+<p>Research branches are just normal branches that can be compared to other research branches or the development branch. They can be created by branching off of <strong>devel</strong> or another research branch.</p>
+</div>
+<div id="research-branch-examples" class="section level3">
+<h3>Research branch examples</h3>
+<div id="exploring-alternatives" class="section level4">
+<h4>Exploring alternatives</h4>
+<p>Imagine a set of processes {A, B, C} that takes some data input I1 and produces some output O1. The question arises, “say we skip the cumbersome B and C steps and modify A to use I1 and I2, could we produce an O2 that is the same as O1 in all cases?”.</p>
+<p>You would like to test this alternative, but don’t want to modify the existing code, nor the O1 results. Further, you want to be able to create 01 values for a range of parameters and compare the O2 results for those same parameters.</p>
+<p>The solution? Create a research branch, implement the changes, and compare O2 to O1. If this refactoring is favorable, merge the research branch into <strong>devel</strong>. If not, then don’t merge it, but do log what was done and why it was considered unsuccessful. If you need to come back to the branch later, it will be there: <em>unmerged branches are still valuable</em>.</p>
+</div>
+<div id="collaborating-in-a-repo" class="section level4">
+<h4>Collaborating in a repo</h4>
+<p>Imagine researchers A and B collaborating on the same repo. Their work can be logged in their respective forks or branches, ie. <code>A/optimizer</code> and <code>B/simplify-test</code>, before deciding to merge them into <code>devel</code> for publication, or not. If <code>A/optimizer</code> doesn’t produce valuable results, it may be orphaned, but logged in the repo for posterity.</p>
+</div>
+</div>
+</div>
+<div id="frequently-asked-questions" class="section level2">
+<h2>Frequently asked questions</h2>
+<div id="isnt-this-overkill-we-usually-only-publish-one-thing-and-then-make-small-adjustments-before-starting-a-new-project." class="section level3">
+<h3>Isn’t this overkill? We usually only publish one thing and then make small adjustments before starting a new project.</h3>
+<p>Many research projects might never need to use more than a master and develop branch. They might only publish once and not need any semantic understanding of what was changed between publications. They might even just start out committing everything to master. That’s fine. The purpose of Research Flow is to make it easier to understand and manage different branches of research when things get more complex.</p>
+<p>Perhaps the simplest answer:</p>
+<blockquote>
+<p>If Research Flow isn’t solving a problem you feel like you have run into before, don’t use it</p>
+</blockquote>
+</div>
+<div id="when-should-we-create-a-research-branch" class="section level3">
+<h3>When should we create a research branch?</h3>
+<p>Possibly the most obvious reason to create a research branch:</p>
+<blockquote>
+<p>you or a collaborator want to significantly alter an existing branch but also want to easily be able to “go back to how it was”</p>
+</blockquote>
+</div>
+<div id="why-not-just-do-everything-on-devel-or-create-separate-files-or-functions-to-explore-different-research-ideas" class="section level3">
+<h3>Why not just do everything on devel or create separate files or functions to explore different research ideas?</h3>
+<p>This does work in simple scenarios, however when projects get complicated and involve multi-file, multi-function, or multi-researcher processes, keeping track of dependencies becomes challenging. Undo’ing and redo’ing changes does too. Separating work into research branches isolates processes until the team decides what should be incorporated into published results.</p>
+</div>
+<div id="can-i-publish-two-articles-from-the-same-repo" class="section level3">
+<h3>Can I publish two articles from the same repo?</h3>
+<p>Remember, we are not just publishing an article, we’re publishing the entire <strong>devel</strong> branch, articles and code included. Therefore, the publication’s version needs to consider the state of the repo, not a particular article. If a second article is produced, it would resemble a new file in the repo. This represents new information to be shared, hence at least an increase of the minor version in a subsequent publication. The articles themselves may need their own version histories or supporting documentation via something like a <code>CHANGES.md</code> file.</p>
+</div>
+<div id="what-about-persistent-data-across-multiple-branches" class="section level3">
+<h3>What about persistent data across multiple branches?</h3>
+<p>When using multiple branches, special care must be taken to handle and separate branch-specific data, ie. the <code>rsch/1</code> branch should not be overwriting data that the <code>rsch/2</code> branch might access. This can be done fairly easily, but it is crucial that it <em>is</em> done.</p>
+</div>
+</div>
+<div id="handy-patterns-and-tips" class="section level2">
+<h2>Handy patterns and tips</h2>
+<div id="the-github-permalink" class="section level3">
+<h3>The GitHub permalink</h3>
+<p>As progress is made in any branch, one can link to a specific line of code in an R script using GitHub <a href="https://help.github.com/en/github/managing-files-in-a-repository/getting-permanent-links-to-files">permalinks</a>.</p>
+<p>Imagine you have published your results to <strong>master</strong>. You present your results and share a presentation that includes a link to the the <code>R/results.R</code> script file on your master branch so that a reader can reproduce the exact same graph. As long as you never change <code>R/results.R</code>, everything will work fine.</p>
+<p>But now say you decide to reformat your graph extensively by changing the code in <code>R/results.R</code>. You do so and then publish again to master. The issue now is that the presentation you shared still references the same <code>R/results.R</code> file. When someone reading the presentation visits the link to <code>R/results.R</code> to reproduce your results, the graph be different. Fix this by sharing a permalink to the exact line of code that produced the graph- this will never change, no matter how many times you publish to master.</p>
+<p>Until recently, we avoided using RMarkdown files because they were rendered by GitHub as markdown and hence did not have permlink features. We are glad to report that this is <a href="https://yihui.org/en/2018/10/rmd-github/">no longer the case</a>.</p>
+</div>
+<div id="archiving-versioned-copies-of-presentations" class="section level3">
+<h3>Archiving versioned copies of presentations</h3>
+<p>When presenting results, archive a version of the presentation aligned to the release on <strong>master</strong>. In other words, “Save a copy” of your presentation documents and label them with the master version that they refer to. In a google-doc, for example, the original cloud document might continue to evolve, but you can view the copy of the document (or even use google docs’ built-in versionin’s “name this version” functionality) that has the same version as the earlier publication. This is often useful when having to consider “what were we thinking when we presented this?”.</p>
+</div>
+<div id="branch-histories-in-repo" class="section level3">
+<h3>Branch histories in repo</h3>
+<p>Including a <code>## Branch history</code> section in <code>README.md</code>, or <code>branch_history.md</code> will help you understand what the branch was attempting to address and what the results were. For example, suppose your branching looks like this (<code>o</code> represents a commit, and <code>\</code> represents a branching action):</p>
+<pre><code>master o-------------------------
+devel   \--o--o--o---------------
+rsch/1      \--o--o--o-----o-----
+rsch/1b      \        \--o--o--o-
+rsch/2        \--o--o----------o-</code></pre>
+<p>In other words, you were working on <strong>devel</strong> and then branched off <strong>rsch/1</strong> and <strong>rsch/2</strong> to work on two separate issues. You then added commits to <strong>devel</strong>, <strong>rsch/1</strong>, and <strong>rsch/2</strong> before branching off from <strong>rsch/1</strong> to <strong>rsch/1b</strong>.</p>
+<p>Say you’re on a particular sub-branch, like <strong>rsch/1b</strong>: how do you know what issues you were attempting to address and what the results were?</p>
+<p>A simple solution is to look at the commit history using <code>git log</code>, or even view the history in GitHub. However, when results are derived from the commits they may need to be summarized. Logging comments to a file allows you to remind your future self of what you were doing and what the results were.</p>
+<p>In this case, on <code>rsch/1b</code> we might have something like:</p>
+<pre><code>## Branch history
+
+Most recent parent branch first:
+
+#rsch/1b
+removed secondary dataset and verified we
+produce the same results
+
+# rsch/1
+Branched from devel to modify all queries 
+for data provider 1 instead of 0
+
+Branching rsch/1b to verify elimination of
+secondary data set produces same results
+
+# devel
+Developing initial model with data provider 0
+
+Branching to rsch/1 and rsch/2 to test model
+on data providers 1 and 2
+
+# master
+first commit
+</code></pre>
+<p>Whereas on <code>devel</code>, we might have something like:</p>
+<pre><code>## Branch history
+
+Most recent parent branch first:
+
+# devel
+Developing initial model with data provider 0
+
+Branching to rsch/1 and rsch/2 to test model
+on data providers 1 and 2
+
+Added output metrics for model
+
+# master
+first commit
+</code></pre>
+<p>Additionally, when deciding to abandon a research branch, it is useful to log why things didn’t work out. We have found that we don’t often come back to abandoned branches, but when we do, it can save days of work.</p>
+</div>
+<div id="comparing-branches" class="section level3">
+<h3>Comparing branches</h3>
+<p>GitHub allows you to compare changes between branches through its <a href="https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-comparing-branches-in-pull-requests#diff-view-options">pull request feature</a>. To do this, push a branch to the repo (or to a fork of the repo) and then go to the repo’s main page. Click on “New pull request” next to the branch button and then choose the <code>base:</code> and <code>compare:</code> branch options to choose the two branches you want to compare. You don’t have to create the pull request, you can just view the differences between files. This is often helpful in understanding what changed between a research branch and the devel branch prior to merging the research branch modifications into devel. This functionality is also available on the Git command-line-interface via <code>git diff</code>.</p>
+</div>
+</div>
+<div id="final-words" class="section level2">
+<h2>Final words</h2>
+<p>Research Flow is not a Git/GitHub reproducible research panacea. On the other hand, Research Flow does provide a few simple rules to tailor Git usage to reproducible research, in a format that is hopefully permissive enough to be incorporated as-needed into existing workflows. It emphasizes the value of chronicling abandoned, un-merged branches and proposes norms for publication and development. If you do end up incorporating it into your work, I would be interested in hearing about it.</p>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="../../../js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

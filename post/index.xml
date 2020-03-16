@@ -6,10 +6,22 @@
     <description>Recent content in Posts on Roland&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 05 Nov 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 24 Feb 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Git Workflows for Reproducible Research</title>
+      <link>/2020/02/24/git-workflows-for-reproducible-research.html</link>
+      <pubDate>Mon, 24 Feb 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/02/24/git-workflows-for-reproducible-research.html</guid>
+      <description>edit
+About 10 years ago, Vincent Driessen published the seminal post “A successful Git branching model” describing a logical process for developing, releasing, and fixing software projects using Git branches. It quickly became knows as Gitflow, and is one of the most widely used branching models for release-based software development.
+The essential branches in the Gitflow branching model
+ Gitflow was perhaps the first well-publicized Git branching model. Other branching models followed, the most famous being GitHub Flow, which proposed a more simplified philosophy aimed at software deployed to production continuously.</description>
+    </item>
     
     <item>
       <title>In-Database Logistic Regression with R</title>
