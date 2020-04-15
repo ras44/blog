@@ -6,10 +6,22 @@
     <description>Recent content in Posts on Roland&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 24 Feb 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 15 Apr 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>10 Commands to Get Started with Git</title>
+      <link>/2020/04/15/10-commands-to-get-started-with-git.html</link>
+      <pubDate>Wed, 15 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/04/15/10-commands-to-get-started-with-git.html</guid>
+      <description>edit
+Git and its online extensions like GitHub, Bitbucket, and GitLab are essential tools for data science. While the emphasis is often on collaboration, Git can also be very useful to the solo practitioner.
+RStudio offers Git functionality via a convenient web-based interface (see the “Git” tab), as well as interaction with git via the command-line (via the “Console” tab, or via the “Git” tab’s “More”-&amp;gt;“Shell” menu option).
+Resources such as HappyGitWithR and try.</description>
+    </item>
     
     <item>
       <title>Git Workflows for Reproducible Research</title>

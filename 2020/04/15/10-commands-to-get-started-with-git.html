@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.54.0" />
+
+
+<title>10 Commands to Get Started with Git - Roland&#39;s Blog</title>
+<meta property="og:title" content="10 Commands to Get Started with Git - Roland&#39;s Blog">
+
+
+  <link href='../../../favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="../../../css/fonts.css" media="all">
+<link rel="stylesheet" href="../../../css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="../../../" class="nav-logo">
+    <img src="../../../images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="https://github.com/ras44">GitHub</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">10 Commands to Get Started with Git</h1>
+
+    
+    <span class="article-date">2020-04-15</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p><a href="https://github.com/ras44/blog/edit/master/content/post/2020-04-15-10-commands-to-get-started-with-git.Rmd">edit</a></p>
+<p><code>Git</code> and its online extensions like <a href="www.github.com">GitHub</a>, <a href="www.bitbucket.com">Bitbucket</a>, and <a href="www.gitlab.com">GitLab</a> are essential tools for data science. While the emphasis is often on collaboration, Git can also be very useful to the solo practitioner.</p>
+<p>RStudio offers Git functionality via a convenient web-based interface (see the “Git” tab), as well as interaction with git via the command-line (via the “Console” tab, or via the “Git” tab’s “More”-&gt;“Shell” menu option).</p>
+<p>Resources such as <a href="www.happygitwithr.com">HappyGitWithR</a> and <a href="https://try.github.io/">try.github.io</a> provide detailed <a href="https://happygitwithr.com/install-git.html">setup instructions</a> and <a href="https://github.com/jlord/git-it-electron#git-it-desktop-app">interactive tutorials</a>. Once you have set up Git, here are 10 commands and their RStudio GUI interface equivalents to get started using Git.</p>
+<p>I encourage you to practice with both the command-line and the RStudio Git interface. The following commands should eventually become so habitual that they take only seconds to complete.</p>
+<div id="git-config" class="section level2">
+<h2>git config</h2>
+<p>Console command: <code>git config</code></p>
+<p>Before getting started with git, you should identify yourself with:</p>
+<pre><code>git config --global user.name &quot;&lt;YOUR NAME&gt;&quot;
+git config --global user.email &lt;YOUR EMAIL&gt;</code></pre>
+<p>These values will later show up in all commit and collaboration messages, so make sure they are appropriate for public visbility.</p>
+</div>
+<div id="git-init" class="section level2">
+<h2>git init</h2>
+<p>Console command: <code>git init</code></p>
+<p>There are many ways to treat your RStudio project as a git repository, or <strong>repo</strong> for short. If you create a new project, RStudio will give you the option to use Git with the project:</p>
+<p><img src="../../../post/2020-04-15-10-commands-to-get-started-with-git_files/New_Project_Create_Git_Repo.jpg" width="700" /></p>
+<p>To use git with an existing project, click on Tools -&gt; Project Options -&gt; Git/SVN:</p>
+<p><img src="../../../post/2020-04-15-10-commands-to-get-started-with-git_files/Project_Options_Use_Git.jpg" width="700" /></p>
+</div>
+<div id="git-add" class="section level2">
+<h2>git add</h2>
+<p>Console command: <code>git add &lt;FILENAME&gt;</code></p>
+<p>Git is used to keep track of how files change. The changes to files in your project can be in one of two states:</p>
+<ul>
+<li><strong>unstaged</strong>: changes that won’t be included in the next commit</li>
+<li><strong>staged</strong>: changes that will be included in the next commit</li>
+</ul>
+<p>We use <code>git add</code> to add changes to the staging area. Common changes include:</p>
+<ul>
+<li>add a new file</li>
+<li>add new changes to a previously-committed file</li>
+</ul>
+<p>In RStudio we can easily <code>git add</code> both types of changes to the staging area by clicking on the checkbox in the “Staged” column next to the filename:</p>
+<p><img src="../../../post/2020-04-15-10-commands-to-get-started-with-git_files/Git_Add_Staged.jpg" width="700" /></p>
+<p>In the above example, we have staged two files. The green “A” icon is for Added (as opposed to a blue “M” for Modified, or a yellow “?” for an un-tracked file).</p>
+</div>
+<div id="git-reset" class="section level2">
+<h2>git reset</h2>
+<p>Console command: <code>git reset -- &lt;FILENAME&gt;</code></p>
+<p>Unstage a file with <code>git reset</code>, or in RStudio, just uncheck the checkbox. It’s that simple.</p>
+</div>
+<div id="git-rm" class="section level2">
+<h2>git rm</h2>
+<p>Console command: <code>git rm &lt;FILENAME&gt;</code></p>
+<p>Staging the removal of a tracked file looks simple, but <strong>be warned</strong>:</p>
+<blockquote>
+<p>you cannot simply undo a <code>git rm</code> removal by running <code>git reset -- &lt;FILENAME&gt;</code> as we did with <code>git add &lt;FILENAME&gt;</code></p>
+</blockquote>
+<p><code>git rm</code> stages the removal of the file so that the next commit knows the file was removed, but it also removes the actual file. This frequently causes panic in new git users when they don’t see the deleted file restored after running <code>git reset -- &lt;FILENAME&gt;</code>. Restoring the file requires two steps:</p>
+<ul>
+<li><code>git reset -- &lt;FILENAME&gt;</code></li>
+<li><code>git checkout &lt;FILENAME&gt;</code></li>
+</ul>
+<p>In RStudio, removal, and undo’ing the removal, are simpler. If you delete a tracked file, you will see a red “D” icon in the “Status” column of the “Git” tab indicating that it has been Deleted. Clicking on the checkbox in the “Staged” column will stage the removal to be included in the next commit. Clicking on the file and then clicking “More”-&gt;“Revert” will undo the deletion.</p>
+</div>
+<div id="git-status" class="section level2">
+<h2>git status</h2>
+<p>Console command: <code>git status</code></p>
+<p>To see what files are staged, unstaged, as well as what files have been modified, use <code>git status</code>. In RStudio, status is always visible by looking at the Status column of the “Git” tab.</p>
+</div>
+<div id="git-commit" class="section level2">
+<h2>git commit</h2>
+<p>Console command: <code>git commit</code></p>
+<p>Changes can be saved to the repo’s log in the form of a <strong>commit</strong>, a checkpoint that includes all information about how the files were changed at that point in time. Adding a concise commit message is valuable in that it allows you to quickly look through the log and understand what changes were made.</p>
+<p>Do not use generic messages like “Updated files”: this greatly reduces the value of the commit log, as well as most other collaborative features. Other recommendations and opinions exist about how best to author a commit message, but the starting point is to include a concise (~50-character) description of what changed.</p>
+<p>Using <code>git commit</code> via the console will open up a console-based editor that allows you to author the commit message.</p>
+<p>In RStudio, click on the “Commit” icon in the “Git” tab. This will open up the “Review Changes” window, which allows you to see what has changed, and stage and unstage files before adding a commit message and clicking on “Commit” to finalize the commit:</p>
+<p><img src="../../../post/2020-04-15-10-commands-to-get-started-with-git_files/Git_Commit_Add_Example_2.jpg" width="700" /></p>
+<p>When the commit is complete, you’ll see a message like the following:</p>
+<p><img src="../../../post/2020-04-15-10-commands-to-get-started-with-git_files/Git_Commit_Close.jpg" width="700" /></p>
+</div>
+<div id="git-diff" class="section level2">
+<h2>git diff</h2>
+<p>Console command: <code>git diff &lt;FILENAME&gt;</code></p>
+<p><code>git diff</code> will show you what has changed in a file that has already been committed to the repo. The “diff”erence is calculated between the what the file looked like at the last commit, and what it currently looks like in the working directory. The console <code>git diff</code> command will not show you what new files exist in the unstaged area.</p>
+<p>In RStudio, just click on the “Diff” button in the “Git” tab, to see something like the following:</p>
+<p><img src="../../../post/2020-04-15-10-commands-to-get-started-with-git_files/Git_Diff.jpg" width="700" /></p>
+<p>Red/green shaded lines indicate lines that were removed/added to the file. In RStudio, new files appearing in the working directory will be entirely green.</p>
+<p>Looking at git diff can be very useful when you want to know “what did I do since I last committed a change to this file?”. A common pattern after completing a segment of work is to use <code>git diff</code> to see what was changed overall, and then split the changes into logical commits that describe what was done.</p>
+<p>For example, if four different files were modified to complete one logical change, add them all in the same commit. If half the files changed were related to one topic and the other half related to another topic, add-and-commit the two sets of files with separate commit messages describing the two distinct topics addressed.</p>
+</div>
+<div id="git-log" class="section level2">
+<h2>git log</h2>
+<p>Console command: <code>git log</code></p>
+<p>To see a log of all commits and commit messages, use <code>git log</code>. In the RStudio interface, click on the “History” icon in the “Git” tab. This will pop up a window that shows the commit history:</p>
+<p><img src="../../../post/2020-04-15-10-commands-to-get-started-with-git_files/Git_Log.jpg" width="700" /></p>
+<p>As shown above, it will also allow you to easily view what was changed in each commit with a display of the commit’s “diff”.</p>
+</div>
+<div id="git-checkout" class="section level2">
+<h2>git checkout</h2>
+<p>When running <code>git status</code>, if there are files in the working directory that have changes, Git will provide the helpful message:</p>
+<blockquote>
+<p>use “git checkout – <file>…” to discard changes in working directory</p>
+</blockquote>
+<p><code>git checkout -- &lt;FILENAME&gt;</code> will discard changes in the working directory, so be very careful about using <code>git checkout</code>: you will lose all changes you have made to a file.</p>
+<p><code>git checkout</code> is the basis for Git’s very powerful time-traveling features, allowing you to see what your code looks like in another commit that lies backwards, forwards, or even <em>sideways</em> in time. <code>git checkout</code> allows you to create “branches”, which we will discuss in a future post.</p>
+<p>For now, just remember that checking-out a file that has been changed in your working directory will destroy those changes.</p>
+<p>In RStudio, there is no interface to <code>git checkout</code>- probably for good reason. It exposes a lot of functionality and can quickly lead a novice down a delicate path of learning opportunities.</p>
+</div>
+<div id="next-steps" class="section level1">
+<h1>Next steps</h1>
+<p>Now that you have git set up, create a project and play with the above commands. Create files, add them, commit the changes, diff the changes, remove them. See what happens when you attempt to <code>git reset -- &lt;FILENAME&gt;</code> after a <code>git rm &lt;FILENAME&gt;</code>, or see what <code>git checkout &lt;FILENAME&gt;</code> does when you have made changes to that file (hint: it destroys them!).</p>
+<p>Also look at how RStudio handles these operations, likely intentionally keeping the novice safely within a subset of functionality, while also providing convenient GUI visualizations of diffs, histories, staged-state, and status.</p>
+<p>Committing changes should become a regular part of your workflow, and understanding this essential commands will lay the foundations for the more complex workflows we’ll discuss in a future post.</p>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="../../../index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="../../../images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+
+    
+  </body>
+</html>
+
